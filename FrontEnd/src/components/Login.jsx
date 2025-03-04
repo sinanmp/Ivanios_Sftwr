@@ -108,19 +108,19 @@ export default function LoginPage() {
             </div>
 
             {/* OR Separator with Lines */}
-            <div className="flex items-center my-6">
+            {/* <div className="flex items-center my-6">
               <div className="flex-1 border-t border-gray-300"></div>
               <span className="px-3 text-gray-500 text-sm">OR</span>
               <div className="flex-1 border-t border-gray-300"></div>
-            </div>
+            </div> */}
 
             {/* Social Media Login */}
-            <div className="flex justify-center gap-4">
+            {/* <div className="flex justify-center gap-4">
               <FaGoogle className="text-2xl cursor-pointer text-red-500" />
               <FaFacebook className="text-2xl cursor-pointer text-blue-600" />
               <FaTwitter className="text-2xl cursor-pointer text-sky-400" />
               <FaLinkedin className="text-2xl cursor-pointer text-blue-700" />
-            </div>
+            </div> */}
           </CardContent>
         </Card>
       </div>
