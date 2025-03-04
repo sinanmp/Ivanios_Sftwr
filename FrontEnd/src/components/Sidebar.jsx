@@ -106,6 +106,7 @@ const Sidebar = () => {
               <div className="ml-6 space-y-1">
                 <NavLink to="/students/all" className={({ isActive }) => `block p-2 rounded-md ${isActive ? "bg-blue-100 text-blue-600" : "hover:bg-gray-200"}`}>All Students</NavLink>
                 <NavLink to="/students/add" className={({ isActive }) => `block p-2 rounded-md ${isActive ? "bg-blue-100 text-blue-600" : "hover:bg-gray-200"}`}>Add Student</NavLink>
+                <NavLink to="/students/attendance" className={({ isActive }) => `block p-2 rounded-md ${isActive ? "bg-blue-100 text-blue-600" : "hover:bg-gray-200"}`}>Attendance</NavLink>
               </div>
             )}
           </div>
