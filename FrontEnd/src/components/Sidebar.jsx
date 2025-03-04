@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
+import logo from '../assets/IVANIOS-removebg-preview.png'
 import {
   FaAngleLeft,
   FaAngleRight,
@@ -34,9 +35,10 @@ const Sidebar = () => {
         </button>
 
         {/* Logo */}
-        <div className="flex items-center space-x-2 mb-6">
-          <MdOutlineSchool size={30} className="text-blue-600" />
-          {isOpen && <h2 className="text-xl font-semibold text-gray-700">Smart</h2>}
+        <div className="flex justify-center mb-6">
+          {isOpen && 
+          <img src={logo} className="h-28" alt="" />
+          }
         </div>
 
         {/* Navigation */}
