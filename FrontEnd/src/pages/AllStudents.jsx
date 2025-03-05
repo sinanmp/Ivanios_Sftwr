@@ -1,3 +1,5 @@
+import Sidebar from "../components/Sidebar";
+
 const AllStudents = () => {
     const students = [
       { id: 1, name: "John Doe", rollNo: "101", department: "CS", email: "john@example.com" },
@@ -5,7 +7,11 @@ const AllStudents = () => {
     ];
   
     return (
-      <div className="bg-white p-6 rounded-lg shadow-md">
+      <>
+      <div className="flex">
+        
+        <Sidebar/>
+      <div className="bg-white w-full p-6 rounded-lg shadow-md">
         <h2 className="text-2xl font-semibold mb-4">All Students</h2>
         <table className="w-full border-collapse border border-gray-300">
           <thead>
@@ -28,6 +34,8 @@ const AllStudents = () => {
           </tbody>
         </table>
       </div>
+            </div>
+            </>
     );
   };
   

@@ -1,5 +1,9 @@
+import Sidebar from "../components/Sidebar";
+
 const EditStudent = () => {
     return (
+      <>
+        <Sidebar/>
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-2xl font-semibold mb-4">Edit Student</h2>
         <form className="grid grid-cols-2 gap-4">
@@ -17,6 +21,7 @@ const EditStudent = () => {
           <button className="col-span-2 bg-green-500 text-white py-2 rounded-md">Update</button>
         </form>
       </div>
+      </>
     );
   };
   
