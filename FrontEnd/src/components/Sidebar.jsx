@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from "react";
+import logo from '../assets/logo.png.png'
 import { NavLink, useLocation } from "react-router-dom";
 import {
   FaAngleLeft,
@@ -62,9 +63,12 @@ const Sidebar = () => {
           {isOpen ? <FaAngleLeft size={20} /> : <FaAngleRight size={20} />}
         </button>
 
-        <div className="flex items-center space-x-2 mb-6">
-          <MdOutlineSchool size={30} className="text-blue-600" />
-          {isOpen && <h2 className="text-xl font-semibold text-gray-700">Smart</h2>}
+        <div className="flex items-center justify-center space-x-2">
+          {/* <MdOutlineSchool size={30} className="text-blue-600" />
+          {isOpen && <h2 className="text-xl font-semibold text-gray-700">Smart</h2>} */}
+          {isOpen && 
+          <img src={logo} className="h-48" alt="" />
+          }
         </div>
 
         <nav className="space-y-2">
