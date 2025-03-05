@@ -7,7 +7,7 @@ import {
   FaPlus,
   FaTrash,
 } from "react-icons/fa";
-import Sidebar from "./Sidebar";
+import Sidebar from "../components/Sidebar";
 
 const AddStudent = () => {
   const [certificates, setCertificates] = useState([]);
