@@ -9,8 +9,6 @@ import StudentAttendance from "../components/StudentAttendance";
 const MainContent = () => {
   return (
     <div className="flex h-screen">
-      {/* Sidebar (Fixed Width) */}
-      <Sidebar />
 
       {/* Main Content (Takes Available Space) */}
       <div className="flex-1 p-6 bg-gray-100 overflow-auto">
