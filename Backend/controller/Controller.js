@@ -1,7 +1,39 @@
-import Batch from "../model/BatchModel";
-import Student from "../model/StudentModel";
+import Batch from "../model/BatchModel.js";
+import Student from "../model/StudentModel.js";
+import 'dotenv/config'
 
 class Controller {
+
+
+  static async adminLogin(req,res) {
+    try {
+      const {username , password } = req.body
+      if(process.env.ADMIN_USERNAME !==username){
+       return res.status(400).json({
+          error:true ,
+          message:"username is incorrect",
+          field:'username'
+        })
+      }
+
+      if(process.env.ADMIN_PASSWORD !== password){
+       return res.status(400).json({
+           error : true ,
+           message :"password is incorrect",
+           field : "password"  
+        })
+      }
+
+      res.status(200).json({
+        error:false ,
+        message :"admin logged in successfully !!"
+      })
+
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Error when logging admin", error :true});
+    }
+  }
 
   static async createBatch(req, res) {
     try {
@@ -25,7 +57,7 @@ class Controller {
       });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: "Error creating batch", error });
+      res.status(500).json({ message: "Error creating batch", error :true});
     }
   }
 
@@ -33,10 +65,13 @@ class Controller {
   static async getAllBatches(req, res) {
     try {
       const batches = await Batch.find();
-      res.status(200).json(batches);
+      res.status(200).json({
+        error:false ,
+        batches:batches
+      });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: "Error retrieving batches", error });
+      res.status(500).json({ message: "Error retrieving batches", error :true});
     }
   }
 
@@ -52,10 +87,13 @@ class Controller {
         return res.status(404).json({ message: "Batch not found" });
       }
 
-      res.status(200).json(batch.students);
+      res.status(200).json({
+        error:false,
+        students:batch.students
+      });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: "Error retrieving students", error });
+      res.status(500).json({ message: "Error retrieving students", error:true });
     }
   }
 
@@ -69,7 +107,7 @@ class Controller {
       const batch = await Batch.findById(batchId);
 
       if (!batch) {
-        return res.status(404).json({ message: "Batch not found" });
+        return res.status(404).json({ error : true ,message: "Batch not found" });
       }
 
       // Create the new student and associate it with the batch
@@ -89,12 +127,13 @@ class Controller {
       await batch.save();
 
       res.status(201).json({
+        error : false ,
         message: "Student added to batch successfully",
         student: newStudent,
       });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: "Error adding student to batch", error });
+      res.status(500).json({ message: "Error adding student to batch", error : true });
     }
   }
 }
