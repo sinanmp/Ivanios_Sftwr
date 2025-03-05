@@ -2,14 +2,22 @@ import { Routes, Route } from "react-router-dom";
 import AddStudent from "../pages/AddStudent";
 import AllStudents from "../pages/AllStudents";
 import AboutStudent from "../components/AboutStudent";
-
+import LoginPage from "../pages/Login";
+import ProtectedRoute from "./ProtectedRoute";
 const LayoutRoutes = () => {
   return (
     <div>
         <Routes>
-          <Route path="/students/add" element={<AddStudent />} />
-          <Route path="/students/all" element={<AllStudents />} />
-          <Route path="/students/about" element={<AboutStudent />} />
+
+          <Route path="/" element={<LoginPage/>} />
+
+
+          <Route element={<ProtectedRoute/>}>
+              <Route path="/students/add" element={<AddStudent />} />
+              <Route path="/students/all" element={<AllStudents />} />
+              <Route path="/students/about" element={<AboutStudent />} />
+         </Route>
+
         </Routes>
     </div>
   );
