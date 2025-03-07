@@ -7,6 +7,7 @@ import {
   FaPlus,
   FaTrash,
 } from "react-icons/fa";
+import Sidebar from "../components/Sidebar";
 
 const AddStudent = () => {
   const [certificates, setCertificates] = useState([]);
@@ -100,6 +101,7 @@ const AddStudent = () => {
     if (file) {
       setPhoto(URL.createObjectURL(file));
       setPhotoName(file.name);
+
     }
   };
 
@@ -113,7 +115,7 @@ const AddStudent = () => {
 
   return (
     <div className="flex fixed top-0 left-0 w-full h-screen bg-gray-100">
-      <Sidebar />
+      <Sidebar/>
       <div className="flex-1 flex flex-col">
         <div className="flex justify-end items-center bg-white px-6 py-4 shadow-md w-full">
           <div className="flex items-center gap-4">
@@ -123,6 +125,13 @@ const AddStudent = () => {
           </div>
         </div>
         <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex items-center text-gray-600 space-x-2 text-lg font-medium">
+            <FaHome className="text-blue-500" />
+            <FaChevronRight />
+            <span>Students</span>
+            <FaChevronRight />
+            <span className="text-blue-500">Add Student</span>
+          </div>
           <div className="mt-6 bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-semibold mb-4">Add Student</h2>
             <form className="grid grid-cols-2 gap-6" onSubmit={handleSubmit}>
@@ -297,6 +306,7 @@ const AddStudent = () => {
                   </div>
                 </div>
               </div>
+              <div>
               {errors.photo && (
                 <p className="text-red-500 text-sm">{errors.photo}</p>
               )}
@@ -310,6 +320,7 @@ const AddStudent = () => {
                   />
                 </div>
               )}
+              </div>
               <div className="col-span-2">
                 <h3 className="text-lg font-semibold mb-2">Certificates</h3>
                 {certificates.map((certificate, index) => (
