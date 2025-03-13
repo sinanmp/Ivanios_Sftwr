@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import logo from '../assets/logo.png.png'
+import logo from '../assets/logo.png.png';
 import { NavLink, useLocation } from "react-router-dom";
 import {
   FaAngleLeft,
@@ -29,14 +29,6 @@ const Sidebar = () => {
 
   function toggleIsOpen() {
     setIsOpen(!isOpen);
-    if (!isOpen) {
-      if (location.pathname.startsWith("/teachers")) {
-        setTeachersOpen(true);
-      }
-      if (location.pathname.startsWith("/students")) {
-        setStudentsOpen(true);
-      }
-    }
   }
 
   function handleParentClick(type) {
@@ -61,17 +53,13 @@ const Sidebar = () => {
       >
         <button
           onClick={toggleIsOpen}
-          className="cursor-pointer absolute top-4 -right-12     bg-blue-500 text-white p-2 rounded-full shadow-md transition-all"
+          className="cursor-pointer absolute top-4 -right-12 bg-blue-500 text-white p-2 rounded-full shadow-md transition-all"
         >
           {isOpen ? <FaAngleLeft size={20} /> : <FaAngleRight size={20} />}
         </button>
 
         <div className="flex items-center justify-center space-x-2">
-          {/* <MdOutlineSchool size={30} className="text-blue-600" />
-          {isOpen && <h2 className="text-xl font-semibold text-gray-700">Smart</h2>} */}
-          {isOpen && 
-          <img src={logo} className="h-48" alt="" />
-          }
+          {isOpen && <img src={logo} className="h-48" alt="" />}
         </div>
 
         <nav className="space-y-2">
@@ -97,42 +85,15 @@ const Sidebar = () => {
               } hover:bg-gray-200`}
             >
               <div className="flex items-center space-x-2">
-                <FaChalkboardTeacher
-                  size={20}
-                  className={({ isActive }) =>
-                    `${isActive ? "bg-blue-100" : "hover:bg-grey-200"}`
-                  }
-                />
+                <FaChalkboardTeacher size={20} />
                 {isOpen && <span>Teachers</span>}
               </div>
               {isOpen && (teachersOpen ? <FaAngleDown /> : <FaAngleRight />)}
             </button>
             {teachersOpen && isOpen && (
               <div className="ml-6 space-y-1">
-                <NavLink
-                  to="/teachers/all"
-                  className={({ isActive }) =>
-                    `block p-2 rounded-md ${
-                      isActive
-                        ? "bg-blue-100 text-blue-600"
-                        : "hover:bg-gray-200"
-                    }`
-                  }
-                >
-                  All Teachers
-                </NavLink>
-                <NavLink
-                  to="/teachers/add"
-                  className={({ isActive }) =>
-                    `block p-2 rounded-md ${
-                      isActive
-                        ? "bg-blue-100 text-blue-600"
-                        : "hover:bg-gray-200"
-                    }`
-                  }
-                >
-                  Add Teacher
-                </NavLink>
+                <NavLink to="/teachers/all" className="block p-2 rounded-md hover:bg-gray-200">All Teachers</NavLink>
+                <NavLink to="/teachers/add" className="block p-2 rounded-md hover:bg-gray-200">Add Teacher</NavLink>
               </div>
             )}
           </div>
@@ -154,45 +115,24 @@ const Sidebar = () => {
             </button>
             {studentsOpen && isOpen && (
               <div className="ml-6 space-y-1">
-                <NavLink
-                  to="/students/all"
-                  className={({ isActive }) =>
-                    `block p-2 rounded-md ${
-                      isActive
-                        ? "bg-blue-100 text-blue-600"
-                        : "hover:bg-gray-200"
-                    }`
-                  }
-                >
-                  All Students
-                </NavLink>
-                <NavLink
-                  to="/students/add"
-                  className={({ isActive }) =>
-                    `block p-2 rounded-md ${
-                      isActive
-                        ? "bg-blue-100 text-blue-600"
-                        : "hover:bg-gray-200"
-                    }`
-                  }
-                >
-                  Add Student
-                </NavLink>
-                <NavLink
-                  to="/students/attendance"
-                  className={({ isActive }) =>
-                    `block p-2 rounded-md ${
-                      isActive
-                        ? "bg-blue-100 text-blue-600"
-                        : "hover:bg-gray-200"
-                    }`
-                  }
-                >
-                  Attendance
-                </NavLink>
+                <NavLink to="/students/all" className="block p-2 rounded-md hover:bg-gray-200">All Students</NavLink>
+                <NavLink to="/students/add" className="block p-2 rounded-md hover:bg-gray-200">Add Student</NavLink>
+                <NavLink to="/students/attendance" className="block p-2 rounded-md hover:bg-gray-200">Attendance</NavLink>
               </div>
             )}
           </div>
+
+          <NavLink
+            to="/batches"
+            className={({ isActive }) =>
+              `flex items-center p-2 space-x-2 rounded-md ${
+                isActive ? "bg-blue-100 text-blue-600" : "hover:bg-gray-200"
+              }`
+            }
+          >
+            <MdOutlineSchool size={20} />
+            {isOpen && <span>Batches</span>}
+          </NavLink>
         </nav>
       </div>
     </div>

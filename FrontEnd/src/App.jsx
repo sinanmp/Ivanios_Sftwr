@@ -9,7 +9,7 @@ function App() {
   return (
     <>
       {/* <Login/> */}
-      <BrowserRouter>\
+      <BrowserRouter>
       <ToastContainer />
          <LayoutRoutes/>
       </BrowserRouter>

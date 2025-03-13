@@ -4,21 +4,20 @@ import AllStudents from "../pages/AllStudents";
 import AboutStudent from "../components/AboutStudent";
 import LoginPage from "../pages/Login";
 import ProtectedRoute from "./ProtectedRoute";
+import BatchesPage from "../pages/Batches";
 const LayoutRoutes = () => {
   return (
     <div>
-        <Routes>
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
 
-          <Route path="/" element={<LoginPage/>} />
-
-
-          <Route element={<ProtectedRoute/>}>
-              <Route path="/students/add" element={<AddStudent />} />
-              <Route path="/students/all" element={<AllStudents />} />
-              <Route path="/students/about" element={<AboutStudent />} />
-         </Route>
-
-        </Routes>
+        <Route element={<ProtectedRoute />}>
+          <Route path="/students/add" element={<AddStudent />} />
+          <Route path="/students/all" element={<AllStudents />} />
+          <Route path="/students/about" element={<AboutStudent />} />
+          <Route path="/batches" element={<BatchesPage />} />
+        </Route>
+      </Routes>
     </div>
   );
 };
