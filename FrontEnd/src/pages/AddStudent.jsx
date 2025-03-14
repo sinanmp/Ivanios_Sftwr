@@ -101,7 +101,6 @@ const AddStudent = () => {
     if (file) {
       setPhoto(URL.createObjectURL(file));
       setPhotoName(file.name);
-
     }
   };
 
@@ -115,7 +114,7 @@ const AddStudent = () => {
 
   return (
     <div className="flex fixed top-0 left-0 w-full h-screen bg-gray-100">
-      <Sidebar/>
+      <Sidebar />
       <div className="flex-1 flex flex-col">
         <div className="flex justify-end items-center bg-white px-6 py-4 shadow-md w-full">
           <div className="flex items-center gap-4">
@@ -125,7 +124,7 @@ const AddStudent = () => {
           </div>
         </div>
         <div className="flex-1 overflow-y-auto p-6">
-        <div className="flex items-center text-gray-600 space-x-2 text-lg font-medium">
+          <div className="flex items-center text-gray-600 space-x-2 text-lg font-medium">
             <FaHome className="text-blue-500" />
             <FaChevronRight />
             <span>Students</span>
@@ -307,19 +306,19 @@ const AddStudent = () => {
                 </div>
               </div>
               <div>
-              {errors.photo && (
-                <p className="text-red-500 text-sm">{errors.photo}</p>
-              )}
-              {photoName !== "No file chosen" && (
-                <div className="">
+                {errors.photo && (
+                  <p className="text-red-500 text-sm">{errors.photo}</p>
+                )}
+                {photoName !== "No file chosen" && (
+                  <div className="">
                     <p className="text-gray-600 text-sm">Preview:</p>
-                  <img
-                    src={photo}
-                    alt="Student Preview"
-                    className="w-32 h-32 object-cover border rounded-md mt-1" 
-                  />
-                </div>
-              )}
+                    <img
+                      src={photo}
+                      alt="Student Preview"
+                      className="w-32 h-32 object-cover border rounded-md mt-1"
+                    />
+                  </div>
+                )}
               </div>
               <div className="col-span-2">
                 <h3 className="text-lg font-semibold mb-2">Certificates</h3>

@@ -37,6 +37,7 @@ class Controller {
 
   static async createBatch(req, res) {
     try {
+      console.log(req.body,'hdfjkasf')
       const { batchName, course, startDate, endDate, instructor } = req.body;
 
       // Create a new batch

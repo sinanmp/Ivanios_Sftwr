@@ -5,6 +5,7 @@ import AboutStudent from "../components/AboutStudent";
 import LoginPage from "../pages/Login";
 import ProtectedRoute from "./ProtectedRoute";
 import BatchesPage from "../pages/Batches";
+import AddBatchPage from "../pages/AddBatch";
 const LayoutRoutes = () => {
   return (
     <div>
@@ -15,7 +16,8 @@ const LayoutRoutes = () => {
           <Route path="/students/add" element={<AddStudent />} />
           <Route path="/students/all" element={<AllStudents />} />
           <Route path="/students/about" element={<AboutStudent />} />
-          <Route path="/batches" element={<BatchesPage />} />
+          <Route path="/batches/all" element={<BatchesPage />} />
+          <Route path="/batches/add" element={<AddBatchPage />} />
         </Route>
       </Routes>
     </div>
