@@ -48,6 +48,14 @@ export default function LoginPage() {
     }
   };
 
+  useEffect(()=>{
+    const user = localStorage.getItem("user")
+    console.log("this is inside useEffect")
+    if(user){
+      navigate("/students/all")
+    }
+  },[])
+
 
   const [isTouched, setIsTouched] = useState({ username: false, password: false });
 
