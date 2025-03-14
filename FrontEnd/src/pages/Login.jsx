@@ -59,6 +59,15 @@ export default function LoginPage() {
     password: false,
   });
 
+
+  useEffect(()=>{
+    const user = localStorage.getItem("user")
+    console.log("this is inside useEffect")
+    if(user){
+      navigate("/students/all")
+    }
+  },[])
+
   useEffect(() => {
     if (!hasMounted.current) {
       hasMounted.current = true;
