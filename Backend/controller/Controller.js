@@ -1,3 +1,4 @@
+import BatchModel from "../model/BatchModel.js";
 import Batch from "../model/BatchModel.js";
 import Student from "../model/StudentModel.js";
 import 'dotenv/config'
@@ -53,6 +54,7 @@ class Controller {
       await newBatch.save();
 
       res.status(201).json({
+        error:false,
         message: "Batch created successfully",
         batch: newBatch,
       });
@@ -101,31 +103,33 @@ class Controller {
   // Add a student to a batch
   static async addStudentToBatch(req, res) {
     try {
-      const { batchId } = req.params;
-      const { name, email, enrollmentNo ,phone} = req.body;
+      const { email ,phone ,batch} = req.body;
+      console.log(req.body)
 
-      // Find the batch
-      const batch = await Batch.findById(batchId);
+      const sbatch = await BatchModel.findOne({_id:batch})
 
-      if (!batch) {
+      if (!sbatch) {
         return res.status(404).json({ error : true ,message: "Batch not found" });
       }
 
       // Create the new student and associate it with the batch
       const newStudent = new Student({
-        name,
-        email,
-        phone,
-        enrollmentNo,
-        batch: batch._id,
+        name: req.body.firstName + ' ' + req.body.lastName,
+        email: req.body.email,
+        mobile: req.body.mobile,
+        rollNo: req.body.rollNo,
+        enrollmentNo: req.body.enrollmentNo,  // Added enrollment number
+        image: req.body.image,               // Added image
+        certificate: req.body.certificate,   // Added certificate
+        batch: sbatch._id,
       });
-
+      
       // Save the student to the database
       await newStudent.save();
 
       // Add the student reference to the batch's students list
-      batch.students.push(newStudent._id);
-      await batch.save();
+      sbatch.students.push(newStudent._id);
+      await sbatch.save();
 
       res.status(201).json({
         error : false ,
@@ -135,6 +139,31 @@ class Controller {
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Error adding student to batch", error : true });
+    }
+  }
+
+
+  static async fetchStudents(req,res){
+    const { page = 1, limit = 10, search = '' } = req.query;
+    try {
+      const students = await Student.find({
+        name: { $regex: search, $options: 'i' }, // For searching
+      })
+        .skip((page - 1) * limit) // Pagination logic
+        .limit(parseInt(limit)); // Number of students per page
+  
+      const total = await Student.countDocuments({
+        name: { $regex: search, $options: 'i' },
+      });
+  
+      res.status(200).json({
+        error:false,
+        students,
+        total,
+        totalPages: Math.ceil(total / limit),
+      });
+    } catch (err) {
+      res.status(500).json({ error: true , message:"Error fetching students" });
     }
   }
 }

@@ -61,10 +61,23 @@ async function getAllBatches() {
   }
 }
 
+async function fetchStudents(page , search) {
+  try {
+    const response = await API.get(`/fetchStudents?page=${page}&&search=${search}`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error.response ? error.response.data : { error: "Network Error" };
+  }
+}
+
+
+
 export default {
   login,
   addStudentToBatch,
   createBatch,
   getStudentsInBatch,
   getAllBatches,
+  fetchStudents
 };
