@@ -100,10 +100,10 @@ const BatchesPage = () => {
                     <td className="border p-3">{batch?.instructor}</td>
                     <td className="border p-3">
                       <button
-                        className="text-red-500 hover:text-red-700"
+                        className="text-blue-500 cursor-pointer hover:text-red-700"
                         // onClick={() => removeBatch(batch._id)}
                       >
-                        <FaTrash />
+                        view
                       </button>
                     </td>
                   </tr>

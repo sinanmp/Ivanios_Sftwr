@@ -11,6 +11,7 @@ router.post("/createBatch",controller.createBatch)
 
 router.get("/getStudentsInBatch",controller.getStudentsInBatch)
 router.get("/getAllBatches",controller.getAllBatches)
+router.get("/fetchStudents",controller.fetchStudents)
 
 
 export default router   

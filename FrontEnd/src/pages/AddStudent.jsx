@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
 import {
   FaHome,
   FaChevronRight,
@@ -8,12 +9,16 @@ import {
   FaTrash,
 } from "react-icons/fa";
 import Sidebar from "../components/Sidebar";
+import api from "../services/api";
+import { useNavigate } from "react-router-dom";
 
 const AddStudent = () => {
   const [certificates, setCertificates] = useState([]);
+  const navigate = useNavigate()
   const [photo, setPhoto] = useState(null);
   const [photoName, setPhotoName] = useState("No file chosen");
   const [registrationDate, setRegistrationDate] = useState("");
+  const [batches, setBatches] = useState([])
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -25,14 +30,29 @@ const AddStudent = () => {
     parentsName: "",
     parentsMobile: "",
     address: "",
+    batch: ""
   });
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    const fetchBatches = async () => {
+      try {
+        const result = await api.getAllBatches()
+        console.log(result)
+        setBatches(result.batches)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    fetchBatches()
+  }, [])
 
   const validateForm = () => {
     let newErrors = {};
     if (!formData.firstName.trim())
       newErrors.firstName = "First name is required";
     if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
+    if (!formData.batch) newErrors.batch = "batch name is required";
     if (!formData.rollNo.trim()) newErrors.rollNo = "Roll No is required";
     if (!formData.gender) newErrors.gender = "Gender is required";
     if (
@@ -61,10 +81,30 @@ const AddStudent = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
+    console.log("clicked")
     if (validateForm()) {
       console.log("Form Submitted Successfully", formData);
+      const result = await api.addStudentToBatch(formData)
+      console.log(result)
+      if(result.error){
+        Swal.fire({
+          icon: "error",
+          title: "Error Adding Student",
+          text: "Something went wrong on the server. Please try again later.",
+        });
+      }else{
+        setFormData({})
+        navigate('/students/all')
+        Swal.fire({
+          icon: "success",
+          title: "Addedd Successfully",
+          text: "Student addded successfully ..",
+        });
+      }
+    }else{
+      console.log("form is not validated")
     }
   };
 
@@ -179,6 +219,27 @@ const AddStudent = () => {
               <div>
                 <select
                   className="p-3 border rounded-md w-full"
+                  value={formData.batch}
+                  onChange={(e) =>
+                    setFormData({ ...formData, batch: e.target.value })
+                  }
+                >
+                  <option value="">Select Batch*</option>
+                  {batches.map((batch, index) => (
+                    <option key={index} value={batch._id}>
+                      {batch.batchName}
+                    </option>
+                  ))}
+                </select>
+                {errors.batch && (
+                  <p className="text-red-500 text-sm">{errors.batch}</p>
+                )}
+              </div>
+
+
+              <div>
+                <select
+                  className="p-3 border rounded-md w-full"
                   value={formData.gender}
                   onChange={(e) =>
                     setFormData({ ...formData, gender: e.target.value })
@@ -269,19 +330,20 @@ const AddStudent = () => {
                   <p className="text-red-500 text-sm">{errors.parentsMobile}</p>
                 )}
               </div>
+              <textarea
+                placeholder="Address*"
+                className="w-full p-2 border rounded-md"
+                value={formData.address}
+                onChange={(e) =>
+                  setFormData({ ...formData, address: e.target.value })
+                }
+              ></textarea>
+              {errors.address && (
+                <p className="text-red-500 text-sm">{errors.address}</p>
+              )}
               <div className="w-full flex">
                 <div className="w-full">
-                  <textarea
-                    placeholder="Address*"
-                    className="w-full p-2 border rounded-md"
-                    value={formData.address}
-                    onChange={(e) =>
-                      setFormData({ ...formData, address: e.target.value })
-                    }
-                  ></textarea>
-                  {errors.address && (
-                    <p className="text-red-500 text-sm">{errors.address}</p>
-                  )}
+
                   <div>
                     <label className="block text-gray-700 font-medium mb-1">
                       Upload Photo*
