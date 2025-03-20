@@ -39,12 +39,12 @@ class Controller {
   static async createBatch(req, res) {
     try {
       console.log(req.body,'hdfjkasf')
-      const { batchName, course, startDate, endDate, instructor } = req.body;
+      const { batchName, courses, startDate, endDate, instructor } = req.body;
 
       // Create a new batch
       const newBatch = new Batch({
         batchName,
-        course,
+        courses,
         startDate,
         endDate,
         instructor,
@@ -103,7 +103,8 @@ class Controller {
   // Add a student to a batch
   static async addStudentToBatch(req, res) {
     try {
-      const { email ,phone ,batch} = req.body;
+      const {data , certificates , photo } = req.body
+      const { email ,phone ,batch} = data
       console.log(req.body)
 
       const sbatch = await BatchModel.findOne({_id:batch})
@@ -114,13 +115,13 @@ class Controller {
 
       // Create the new student and associate it with the batch
       const newStudent = new Student({
-        name: req.body.firstName + ' ' + req.body.lastName,
-        email: req.body.email,
-        mobile: req.body.mobile,
-        rollNo: req.body.rollNo,
-        enrollmentNo: req.body.enrollmentNo,  // Added enrollment number
-        image: req.body.image,               // Added image
-        certificate: req.body.certificate,   // Added certificate
+        name: data.firstName + ' ' + data.lastName,
+        email: data.email,
+        mobile: data.mobile,
+        rollNo: data.rollNo,
+        enrollmentNo: data.enrollmentNo,  // Added enrollment number
+        profileImage: photo,               // Added image
+        certificates: certificates,   // Added certificate
         batch: sbatch._id,
       });
       
@@ -163,7 +164,26 @@ class Controller {
         totalPages: Math.ceil(total / limit),
       });
     } catch (err) {
+      console.log(err)
       res.status(500).json({ error: true , message:"Error fetching students" });
+    }
+  }
+
+
+  static async getStudentDetails(req,res) {
+    try {
+      const id = req.query.id
+      const student = await Student.findOne({_id:id}).populate("batch");
+      res.status(200).json({
+        error:false,
+        student : student
+      })
+    } catch (error) {
+      console.log(error)     
+      res.status(500).json({
+        error:true ,
+        message:"internal server error"
+      }) 
     }
   }
 }

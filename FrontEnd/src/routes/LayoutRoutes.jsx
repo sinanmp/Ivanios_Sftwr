@@ -6,6 +6,7 @@ import LoginPage from "../pages/Login";
 import ProtectedRoute from "./ProtectedRoute";
 import BatchesPage from "../pages/Batches";
 import AddBatchPage from "../pages/AddBatch";
+import StudentDetails from "../pages/StudentDetails";
 const LayoutRoutes = () => {
   return (
     <div>
@@ -18,6 +19,7 @@ const LayoutRoutes = () => {
           <Route path="/students/about" element={<AboutStudent />} />
           <Route path="/batches/all" element={<BatchesPage />} />
           <Route path="/batches/add" element={<AddBatchPage />} />
+          <Route path="/studentDetails/:id" element={<StudentDetails />} />
         </Route>
       </Routes>
     </div>
