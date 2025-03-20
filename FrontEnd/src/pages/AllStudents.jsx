@@ -2,8 +2,9 @@ import { FaBell, FaChevronRight, FaExpand, FaHome, FaEye, FaEdit, FaTrash } from
 import Sidebar from "../components/Sidebar";
 import { useEffect, useState } from "react";
 import api from "../services/api";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import Spinner from "../components/Spinner";
+import TopNav from "../components/TopNav";
 
 const AllStudents = () => {
   const [students, setStudents] = useState([]);
@@ -40,6 +41,8 @@ const AllStudents = () => {
     }
   };
 
+
+
   return (
     <>
     {loading && <Spinner/>}
@@ -47,11 +50,7 @@ const AllStudents = () => {
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <div className="flex justify-end items-center bg-white px-6 py-4 shadow-md w-full">
-          <div className="flex items-center gap-4">
-            <img src="/us-flag.png" alt="Country" className="w-6 h-4" />
-            <FaExpand className="text-xl cursor-pointer text-gray-600" />
-            <FaBell className="text-xl cursor-pointer text-gray-600" />
-          </div>
+          <TopNav/>
         </div>
         <div className="flex-1 overflow-y-auto p-6">
           <div className="flex items-center text-gray-600 space-x-2 text-lg font-medium">
@@ -110,9 +109,12 @@ const AllStudents = () => {
                     <td className="border p-2">{student.department}</td>
                     <td className="border p-2">{student.email}</td>
                     <td className="border p-3 flex h-20 gap-4 justify-center">
+                      
+                      
                       <button onClick={()=> navigate(`/studentDetails/${student._id}`)} className="text-blue-500 cursor-pointer hover:text-blue-700">
                         <FaEye />
                       </button>
+                      
                       <button className="text-green-500 cursor-pointer hover:text-green-700">
                         <FaEdit />
                       </button>

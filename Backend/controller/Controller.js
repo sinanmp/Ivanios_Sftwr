@@ -6,39 +6,39 @@ import 'dotenv/config'
 class Controller {
 
 
-  static async adminLogin(req,res) {
+  static async adminLogin(req, res) {
     try {
-      const {username , password } = req.body
-      if(process.env.ADMIN_USERNAME !==username){
-       return res.status(400).json({
-          error:true ,
-          message:"username is incorrect",
-          field:'username'
+      const { username, password } = req.body
+      if (process.env.ADMIN_USERNAME !== username) {
+        return res.status(400).json({
+          error: true,
+          message: "username is incorrect",
+          field: 'username'
         })
       }
 
-      if(process.env.ADMIN_PASSWORD !== password){
-       return res.status(400).json({
-           error : true ,
-           message :"password is incorrect",
-           field : "password"  
+      if (process.env.ADMIN_PASSWORD !== password) {
+        return res.status(400).json({
+          error: true,
+          message: "password is incorrect",
+          field: "password"
         })
       }
 
       res.status(200).json({
-        error:false ,
-        message :"admin logged in successfully !!"
+        error: false,
+        message: "admin logged in successfully !!"
       })
 
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: "Error when logging admin", error :true});
+      res.status(500).json({ message: "Error when logging admin", error: true });
     }
   }
 
   static async createBatch(req, res) {
     try {
-      console.log(req.body,'hdfjkasf')
+      console.log(req.body, 'hdfjkasf')
       const { batchName, courses, startDate, endDate, instructor } = req.body;
 
       // Create a new batch
@@ -54,13 +54,13 @@ class Controller {
       await newBatch.save();
 
       res.status(201).json({
-        error:false,
+        error: false,
         message: "Batch created successfully",
         batch: newBatch,
       });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: "Error creating batch", error :true});
+      res.status(500).json({ message: "Error creating batch", error: true });
     }
   }
 
@@ -69,12 +69,12 @@ class Controller {
     try {
       const batches = await Batch.find();
       res.status(200).json({
-        error:false ,
-        batches:batches
+        error: false,
+        batches: batches
       });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: "Error retrieving batches", error :true});
+      res.status(500).json({ message: "Error retrieving batches", error: true });
     }
   }
 
@@ -82,7 +82,7 @@ class Controller {
   static async getStudentsInBatch(req, res) {
     try {
       const { batchId } = req.query;
-      
+
       // Find the batch and populate the students
       const batch = await Batch.findById(batchId).populate('students');
 
@@ -91,26 +91,26 @@ class Controller {
       }
 
       res.status(200).json({
-        error:false,
-        students:batch.students
+        error: false,
+        students: batch.students
       });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: "Error retrieving students", error:true });
+      res.status(500).json({ message: "Error retrieving students", error: true });
     }
   }
 
   // Add a student to a batch
   static async addStudentToBatch(req, res) {
     try {
-      const {data , certificates , photo } = req.body
-      const { email ,phone ,batch} = data
+      const { data, certificates, photo } = req.body
+      const { email, phone, batch } = data
       console.log(req.body)
 
-      const sbatch = await BatchModel.findOne({_id:batch})
+      const sbatch = await BatchModel.findOne({ _id: batch })
 
       if (!sbatch) {
-        return res.status(404).json({ error : true ,message: "Batch not found" });
+        return res.status(404).json({ error: true, message: "Batch not found" });
       }
 
       // Create the new student and associate it with the batch
@@ -124,7 +124,7 @@ class Controller {
         certificates: certificates,   // Added certificate
         batch: sbatch._id,
       });
-      
+
       // Save the student to the database
       await newStudent.save();
 
@@ -133,18 +133,18 @@ class Controller {
       await sbatch.save();
 
       res.status(201).json({
-        error : false ,
+        error: false,
         message: "Student added to batch successfully",
         student: newStudent,
       });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: "Error adding student to batch", error : true });
+      res.status(500).json({ message: "Error adding student to batch", error: true });
     }
   }
 
 
-  static async fetchStudents(req,res){
+  static async fetchStudents(req, res) {
     const { page = 1, limit = 10, search = '' } = req.query;
     try {
       const students = await Student.find({
@@ -152,40 +152,62 @@ class Controller {
       })
         .skip((page - 1) * limit) // Pagination logic
         .limit(parseInt(limit)); // Number of students per page
-  
+
       const total = await Student.countDocuments({
         name: { $regex: search, $options: 'i' },
       });
-  
+
       res.status(200).json({
-        error:false,
+        error: false,
         students,
         total,
         totalPages: Math.ceil(total / limit),
       });
     } catch (err) {
       console.log(err)
-      res.status(500).json({ error: true , message:"Error fetching students" });
+      res.status(500).json({ error: true, message: "Error fetching students" });
     }
   }
 
 
-  static async getStudentDetails(req,res) {
+  static async getStudentDetails(req, res) {
     try {
       const id = req.query.id
-      const student = await Student.findOne({_id:id}).populate("batch");
+      const student = await Student.findOne({ _id: id }).populate("batch");
       res.status(200).json({
-        error:false,
-        student : student
+        error: false,
+        student: student
       })
     } catch (error) {
-      console.log(error)     
+      console.log(error)
       res.status(500).json({
-        error:true ,
-        message:"internal server error"
-      }) 
+        error: true,
+        message: "internal server error"
+      })
+    }
+  } static async getBatchDetails(req, res) {
+    try {
+      const batchId = req.query.id; // or req.params.id if using route parameters
+      const batch = await Batch.findOne({ _id: batchId }).populate("students");
+
+      if (!batch) {
+        return res.status(404).json({ error: false, batch: null });
+      }
+
+      res.status(200).json({
+        error: false,
+        batch // Return as an object instead of an array
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        error: true,
+        message: "Internal server error"
+      });
     }
   }
+
+
 }
 
 export default Controller;

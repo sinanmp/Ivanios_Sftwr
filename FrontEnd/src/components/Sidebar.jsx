@@ -4,30 +4,31 @@ import { NavLink, useLocation } from "react-router-dom";
 import {
   FaAngleLeft,
   FaAngleRight,
-  FaUser,
-  FaChalkboardTeacher,
-  FaHome,
   FaUsers,
+  FaHome,
   FaAngleDown,
 } from "react-icons/fa";
 import { MdOutlineSchool } from "react-icons/md";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
-  const [teachersOpen, setTeachersOpen] = useState(false);
   const [studentsOpen, setStudentsOpen] = useState(false);
-  const [batchesOpen, setBatchesOpen] = useState(false); // State for batches dropdown
+  const [batchesOpen, setBatchesOpen] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
-    if (location.pathname.startsWith("/teachers")) {
-      setTeachersOpen(true);
-    }
-    if (location.pathname.startsWith("/students")) {
+    if (
+      location.pathname.startsWith("/students") ||
+      location.pathname.startsWith("/studentDetails")
+    ) {
       setStudentsOpen(true);
-    }
-    if (location.pathname.startsWith("/batches")) {
+      setBatchesOpen(false);
+    } else if (
+      location.pathname.startsWith("/batches") ||
+      location.pathname.startsWith("/batchDetails")
+    ) {
       setBatchesOpen(true);
+      setStudentsOpen(false);
     }
   }, [location.pathname]);
 
@@ -39,17 +40,11 @@ const Sidebar = () => {
     if (!isOpen) {
       setIsOpen(true);
     }
-    if (type === "teachers") {
-      setTeachersOpen(!teachersOpen);
-      setStudentsOpen(false);
-      setBatchesOpen(false);
-    } else if (type === "students") {
+    if (type === "students") {
       setStudentsOpen(!studentsOpen);
-      setTeachersOpen(false);
       setBatchesOpen(false);
     } else if (type === "batches") {
       setBatchesOpen(!batchesOpen);
-      setTeachersOpen(false);
       setStudentsOpen(false);
     }
   }
@@ -84,35 +79,13 @@ const Sidebar = () => {
             <FaHome size={20} />
             {isOpen && <span>Dashboard</span>}
           </NavLink>
-          {/* Teachers Option will be available in the FUTURE */}
-          {/* <div>
-            <button
-              onClick={() => handleParentClick("teachers")}
-              className={`flex cursor-pointer justify-between items-center w-full p-2 rounded-md ${
-                location.pathname.startsWith("/teachers")
-                  ? "text-blue-600"
-                  : "text-black"
-              } hover:bg-gray-200`}
-            >
-              <div className="flex items-center space-x-2">
-                <FaChalkboardTeacher size={20} />
-                {isOpen && <span>Teachers</span>}
-              </div>
-              {isOpen && (teachersOpen ? <FaAngleDown /> : <FaAngleRight />)}
-            </button>
-            {teachersOpen && isOpen && (
-              <div className="ml-6 space-y-1">
-                <NavLink to="/teachers/all" className="block p-2 rounded-md hover:bg-gray-200">All Teachers</NavLink>
-                <NavLink to="/teachers/add" className="block p-2 rounded-md hover:bg-gray-200">Add Teacher</NavLink>
-              </div>
-            )}
-          </div> */}
 
           <div>
             <button
               onClick={() => handleParentClick("students")}
               className={`flex cursor-pointer justify-between items-center w-full p-2 rounded-md ${
-                location.pathname.startsWith("/students")
+                location.pathname.startsWith("/students") ||
+                location.pathname.startsWith("/studentDetails")
                   ? "text-blue-600"
                   : "text-black"
               } hover:bg-gray-200`}
@@ -123,6 +96,7 @@ const Sidebar = () => {
               </div>
               {isOpen && (studentsOpen ? <FaAngleDown /> : <FaAngleRight />)}
             </button>
+
             {studentsOpen && isOpen && (
               <div className="ml-6 space-y-1">
                 <NavLink
@@ -145,6 +119,14 @@ const Sidebar = () => {
                 >
                   Add Student
                 </NavLink>
+                {location.pathname.startsWith("/studentDetails/") && (
+                  <NavLink
+                    // to={location.pathname}
+                    className="block p-2 rounded-md text-blue-600 bg-blue-100"
+                  >
+                    Student Details
+                  </NavLink>
+                )}
               </div>
             )}
           </div>
@@ -153,7 +135,8 @@ const Sidebar = () => {
             <button
               onClick={() => handleParentClick("batches")}
               className={`flex cursor-pointer justify-between items-center w-full p-2 rounded-md ${
-                location.pathname.startsWith("/batches")
+                location.pathname.startsWith("/batches") ||
+                location.pathname.startsWith("/batchDetails")
                   ? "text-blue-600"
                   : "text-black"
               } hover:bg-gray-200`}
@@ -164,6 +147,7 @@ const Sidebar = () => {
               </div>
               {isOpen && (batchesOpen ? <FaAngleDown /> : <FaAngleRight />)}
             </button>
+
             {batchesOpen && isOpen && (
               <div className="ml-6 space-y-1">
                 <NavLink
@@ -186,6 +170,15 @@ const Sidebar = () => {
                 >
                   Add Batch
                 </NavLink>
+                {batchesOpen &&
+                  location.pathname.startsWith("/batchDetails/") && (
+                    <NavLink
+                      to={location.pathname}
+                      className="block p-2 rounded-md text-blue-600 bg-blue-100"
+                    >
+                      Batch Details
+                    </NavLink>
+                  )}
               </div>
             )}
           </div>

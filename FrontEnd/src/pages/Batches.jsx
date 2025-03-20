@@ -101,9 +101,9 @@ const BatchesPage = () => {
                     <td className="border p-3">
                       <button
                         className="text-blue-500 cursor-pointer hover:text-red-700"
-                        // onClick={() => removeBatch(batch._id)}
+                        onClick={() => navigate(`/batchDetails/${batch._id}`)}
                       >
-                        view
+                        View
                       </button>
                     </td>
                   </tr>
