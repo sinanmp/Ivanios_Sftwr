@@ -18,9 +18,9 @@ async function login(data) {
 }
 
 // Add Student to Batch
-async function addStudentToBatch(data) {
+async function addStudentToBatch(data,certificates,photo) {
   try {
-    const response = await API.post("/addStudentToBatch", data);
+    const response = await API.post("/addStudentToBatch", {data ,certificates ,photo});
     return response.data;
   } catch (error) {
     console.error(error);
@@ -72,6 +72,17 @@ async function fetchStudents(page , search) {
 }
 
 
+async function getStudentDetails(id) {
+  try {
+    const response = await API.get(`/getStudentDetails?id=${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error.response ? error.response.data : { error: "Network Error" };
+  }
+}
+
+
 
 export default {
   login,
@@ -79,5 +90,6 @@ export default {
   createBatch,
   getStudentsInBatch,
   getAllBatches,
-  fetchStudents
+  fetchStudents,
+  getStudentDetails
 };
