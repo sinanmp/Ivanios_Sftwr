@@ -13,6 +13,7 @@ router.get("/getStudentsInBatch",controller.getStudentsInBatch)
 router.get("/getAllBatches",controller.getAllBatches)
 router.get("/fetchStudents",controller.fetchStudents)
 router.get("/getStudentDetails",controller.getStudentDetails)
+router.get("/getBatchDetails",controller.getBatchDetails)
 
 
 export default router   

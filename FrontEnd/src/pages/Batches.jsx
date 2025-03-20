@@ -101,7 +101,7 @@ const BatchesPage = () => {
                     <td className="border p-3">
                       <button
                         className="text-blue-500 cursor-pointer hover:text-red-700"
-                        onClick={() => navigate(`/batches/${batch._id}`)}
+                        onClick={() => navigate(`/batchDetails/${batch._id}`)}
                       >
                         View
                       </button>

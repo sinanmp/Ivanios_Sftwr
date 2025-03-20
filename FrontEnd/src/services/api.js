@@ -82,6 +82,18 @@ async function getStudentDetails(id) {
   }
 }
 
+async function getBatchDetails(id){
+  try{
+    const response = await API.get(`/getBatchDetails?id=${id}`);
+    console.log("api js", response)
+    return response.data;
+  }
+  catch(error){
+    console.log(error)
+    return error.response ? error.response.data:{error : "Network Error"}
+  }
+}
+
 
 
 export default {
@@ -91,5 +103,6 @@ export default {
   getStudentsInBatch,
   getAllBatches,
   fetchStudents,
-  getStudentDetails
+  getStudentDetails,
+  getBatchDetails,
 };
