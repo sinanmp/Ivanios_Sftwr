@@ -145,12 +145,6 @@ const Sidebar = () => {
                 >
                   Add Student
                 </NavLink>
-                <NavLink
-                  to="/students/attendance"
-                  className="block p-2 rounded-md hover:bg-gray-200"
-                >
-                  Attendance
-                </NavLink>
               </div>
             )}
           </div>

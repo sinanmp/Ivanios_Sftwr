@@ -5,8 +5,10 @@ import Sidebar from "../components/Sidebar";
 import api from "../services/api";
 import { toast } from "react-toastify";
 import Spinner from "../components/Spinner";
+import { useNavigate } from "react-router-dom";
 
 const AddBatchPage = () => {
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     batchName: "",
     course: "",
@@ -38,6 +40,7 @@ const AddBatchPage = () => {
       const response = await api.createBatch(formData);
       toast.success("Batch added successfully!", { position: "top-center" });
       setFormData({ batchName: "", course: "", startDate: "", endDate: "", instructor: "" });
+      navigate('/batches/all')
     } catch (error) {
       console.error("Error adding batch:", error);
       toast.error("Failed to add batch", { position: "top-center" });

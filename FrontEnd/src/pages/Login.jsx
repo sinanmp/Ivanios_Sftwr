@@ -18,7 +18,7 @@ export default function LoginPage() {
   const [passErr, setPassErr] = useState(false);
   const hasMounted = useRef(false);
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login ,user } = useAuth();
   const navigate = useNavigate();
 
   const onSubmit = async (e) => {
@@ -41,7 +41,7 @@ export default function LoginPage() {
     try {
       const result = await api.login({ username, password });
       if (!result.error) {
-        login({ role: "main admin" });
+        login({ username, role: "main admin" });
         navigate("/students/all");
         toast.success("Login successful! 🎉", { position: "top-center" });
       } else {
@@ -58,6 +58,14 @@ export default function LoginPage() {
     username: false,
     password: false,
   });
+
+
+  useEffect(()=>{
+    console.log("this is inside useEffect")
+    if(user){
+      navigate("/students/all")
+    }
+  },[])
 
   useEffect(() => {
     if (!hasMounted.current) {
