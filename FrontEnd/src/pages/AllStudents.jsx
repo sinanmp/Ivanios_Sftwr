@@ -3,6 +3,7 @@ import Sidebar from "../components/Sidebar";
 import { useEffect, useState } from "react";
 import api from "../services/api";
 import { useNavigate } from "react-router-dom";
+import Spinner from "../components/Spinner";
 
 const AllStudents = () => {
   const [students, setStudents] = useState([]);
@@ -10,15 +11,20 @@ const AllStudents = () => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
+  const [loading , setLoading ] = useState(false)
 
   useEffect(() => {
     const fetchStudents = async () => {
       try {
+        setLoading(true)
         const result = await api.fetchStudents(page, search);
         setStudents(result.students);
+        console.log(result.students)
         setTotalPages(result.totalPages);
       } catch (error) {
         console.error("Error fetching students:", error);
+      }finally {
+        setLoading(false)
       }
     };
 
@@ -37,6 +43,8 @@ const AllStudents = () => {
 
 
   return (
+    <>
+    {loading && <Spinner/>}
     <div className="flex fixed top-0 left-0 w-full h-screen bg-gray-100">
       <Sidebar />
       <div className="flex-1 flex flex-col">
@@ -69,9 +77,9 @@ const AllStudents = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="p-2 border rounded"
-              />
+                />
 
-              <button onClick={()=> navigate('/students/add')} className="bg-blue-600 p-2 text-white cursor-pointer  rounded-sm">
+              <button onClick={() => navigate('/students/add')} className="bg-blue-600 p-2 text-white cursor-pointer  rounded-sm">
                 <p>Add Student</p>
               </button>
             </div>
@@ -81,31 +89,39 @@ const AllStudents = () => {
             <table className="w-full border-collapse border border-gray-300">
               <thead>
                 <tr className="bg-gray-200">
+                  <th className="border p-2">Profile</th>
                   <th className="border p-2">Roll No</th>
                   <th className="border p-2">Name</th>
                   <th className="border p-2">Department</th>
                   <th className="border p-2">Email</th>
                   <th className="border p-2">Actions</th>
                 </tr>
-              </thead>  
+              </thead>
               <tbody>
                 {students.map((student) => (
                   <tr key={student.id}>
+                    <td className="border p-2 flex justify-center">
+                      <img
+                        src={student.profileImage?.url || "/default-profile.png"}
+                        alt="Profile"
+                        className="w-15 h-15 object-center"
+                        />
+                    </td>
                     <td className="border p-2">{student.rollNo}</td>
                     <td className="border p-2">{student.name}</td>
                     <td className="border p-2">{student.department}</td>
                     <td className="border p-2">{student.email}</td>
-                    <td className="border p-3 flex gap-4 justify-center">
-                      <button className="text-blue-500 hover:text-blue-700">
+                    <td className="border p-3 flex h-20 gap-4 justify-center">
+                      <button onClick={()=> navigate(`/studentDetails/${student._id}`)} className="text-blue-500 cursor-pointer hover:text-blue-700">
                         <FaEye />
                       </button>
-                      <button className="text-green-500 hover:text-green-700">
+                      <button className="text-green-500 cursor-pointer hover:text-green-700">
                         <FaEdit />
                       </button>
                       <button
-                        className="text-red-500 hover:text-red-700"
+                        className="text-red-500 cursor-pointer hover:text-red-700"
                         onClick={() => handleDelete(student.id)}
-                      >
+                        >
                         <FaTrash />
                       </button>
                     </td>
@@ -114,13 +130,14 @@ const AllStudents = () => {
               </tbody>
             </table>
 
+
             {/* Pagination Controls */}
             <div className="flex justify-between mt-4">
               <button
                 onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
                 disabled={page === 1}
                 className="px-4 py-2 bg-gray-300 rounded"
-              >
+                >
                 Previous
               </button>
               <span>Page {page} of {totalPages}</span>
@@ -128,7 +145,7 @@ const AllStudents = () => {
                 onClick={() => setPage((prev) => (prev < totalPages ? prev + 1 : prev))}
                 disabled={page === totalPages}
                 className="px-4 py-2 bg-gray-300 rounded"
-              >
+                >
                 Next
               </button>
             </div>
@@ -136,6 +153,7 @@ const AllStudents = () => {
         </div>
       </div>
     </div>
+       </>
   );
 };
 
