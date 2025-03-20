@@ -84,7 +84,7 @@ const Sidebar = () => {
             <FaHome size={20} />
             {isOpen && <span>Dashboard</span>}
           </NavLink>
-          {/* Teachers Option will be available in the FUTURE */}
+          {/* Teachers Option will be available in the FUTURE */}              
           {/* <div>
             <button
               onClick={() => handleParentClick("teachers")}

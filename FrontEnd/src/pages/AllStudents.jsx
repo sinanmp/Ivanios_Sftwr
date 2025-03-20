@@ -7,6 +7,8 @@ const AllStudents = () => {
     { id: 2, name: "Jane Smith", rollNo: "102", department: "Math", email: "jane@example.com" },
   ];
 
+
+
   return (
     <div className="flex fixed top-0 left-0 w-full h-screen bg-gray-100">
       <Sidebar />
