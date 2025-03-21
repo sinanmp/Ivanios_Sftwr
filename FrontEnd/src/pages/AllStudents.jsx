@@ -87,9 +87,9 @@ const AllStudents = () => {
               <thead>
                 <tr className="bg-gray-200">
                   <th className="border p-2">Profile</th>
-                  <th className="border p-2">Roll No</th>
+                  <th className="border p-2">Enrollment No</th>
                   <th className="border p-2">Name</th>
-                  <th className="border p-2">Department</th>
+                  <th className="border p-2">Course</th>
                   <th className="border p-2">Email</th>
                   <th className="border p-2">Actions</th>
                 </tr>
@@ -104,9 +104,9 @@ const AllStudents = () => {
                         className="w-15 h-15 object-center"
                         />
                     </td>
-                    <td className="border p-2">{student.rollNo}</td>
+                    <td className="border p-2">{student.enrollmentNo}</td>
                     <td className="border p-2">{student.name}</td>
-                    <td className="border p-2">{student.department}</td>
+                    <td className="border p-2">{student.course}</td>
                     <td className="border p-2">{student.email}</td>
                     <td className="border p-3 flex h-20 gap-4 justify-center">
                       

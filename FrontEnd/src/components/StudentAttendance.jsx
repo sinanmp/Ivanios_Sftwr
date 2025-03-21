@@ -1,7 +1,7 @@
 const StudentAttendance = () => {
     const students = [
-      { id: 1, name: "John Doe", rollNo: "101" },
-      { id: 2, name: "Jane Smith", rollNo: "102" },
+      { id: 1, name: "John Doe", enrollmentNo: "101" },
+      { id: 2, name: "Jane Smith", enrollmentNo: "102" },
     ];
   
     return (
@@ -10,7 +10,7 @@ const StudentAttendance = () => {
         <table className="w-full border-collapse border border-gray-300">
           <thead>
             <tr className="bg-gray-200">
-              <th className="border p-2">Roll No</th>
+              <th className="border p-2">Enrollment No</th>
               <th className="border p-2">Name</th>
               <th className="border p-2">Attendance</th>
             </tr>
@@ -18,7 +18,7 @@ const StudentAttendance = () => {
           <tbody>
             {students.map((student) => (
               <tr key={student.id}>
-                <td className="border p-2">{student.rollNo}</td>
+                <td className="border p-2">{student.enrollmentNo}</td>
                 <td className="border p-2">{student.name}</td>
                 <td className="border p-2">
                   <input type="checkbox" className="mr-2" />

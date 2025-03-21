@@ -4,8 +4,9 @@ import api from "../services/api"; // Assuming api.js handles API requests
 import Sidebar from "../components/Sidebar";
 import Spinner from "../components/Spinner";
 import { format } from "date-fns";
-import { FaHome, FaChevronRight, FaExpand, FaBell } from "react-icons/fa";
+import { FaHome, FaChevronRight, FaExpand, FaBell, FaEye, FaEdit, FaTrash } from "react-icons/fa";
 import TopNav from "../components/TopNav";
+import { constructFromSymbol } from "date-fns/constants";
 
 const BatchDetailsPage = () => {
   const { id } = useParams();
@@ -33,7 +34,7 @@ const BatchDetailsPage = () => {
   if (loading) return <Spinner />;
   if (error) return <p className="text-red-500">{error}</p>;
   if (!batch) return <p>No batch details found.</p>;
-
+  if(!loading) console.log(batch.students)
   return (
     <div className="flex bg-gray-100">
       <Sidebar />
@@ -97,14 +98,14 @@ const BatchDetailsPage = () => {
               <thead>
                 <tr className="bg-gray-200">
                   <th className="border p-2">Profile</th>
-                  <th className="border p-2">Roll No</th>
+                  <th className="border p-2">Enrollment No</th>
                   <th className="border p-2">Name</th>
-                  <th className="border p-2">Department</th>
+                  <th className="border p-2">Course</th>
                   <th className="border p-2">Email</th>
                   <th className="border p-2">Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody >
                 {batch.students.length > 0 ? (
                   batch.students.map((student) => (
                     <tr key={student._id}>
@@ -117,10 +118,10 @@ const BatchDetailsPage = () => {
                           className="w-15 h-15 object-center"
                         />
                       </td>
-                      <td className="border p-2">{student.rollNo}</td>
-                      <td className="border p-2">{student.name}</td>
-                      <td className="border p-2">{student.department}</td>
-                      <td className="border p-2">{student.email}</td>
+                      <td className="border p-2 text-center">{student.enrollmentNo}</td>
+                      <td className="border p-2 text-center">{student.name}</td>
+                      <td className="border p-2 text-center">{student.course}</td>
+                      <td className="border p-2 text-center">{student.email}</td>
                       <td className="border p-3 flex h-20 gap-4 justify-center">
                         <button
                           onClick={() =>
