@@ -7,6 +7,7 @@ const studentSchema = new mongoose.Schema({
   admissionNo: { type: String, unique: true },
   mobile: { type: String, required: true },
   batch: { type: mongoose.Schema.Types.ObjectId, ref: 'Batch', required: true }, // Reference to Batch
+  course:{type:String},
   profileImage: { 
     url:String,
     publicId:String

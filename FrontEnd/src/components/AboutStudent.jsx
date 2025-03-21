@@ -1,7 +1,7 @@
 const AboutStudent = () => {
     const student = {
       name: "John Doe",
-      rollNo: "101",
+      enrollmentNo: "101",
       email: "john@example.com",
       department: "Computer Science",
       mobile: "9876543210",
@@ -14,7 +14,7 @@ const AboutStudent = () => {
         <h2 className="text-2xl font-semibold mb-4">Student Details</h2>
         <div className="grid grid-cols-2 gap-4">
           <p><strong>Name:</strong> {student.name}</p>
-          <p><strong>Roll No:</strong> {student.rollNo}</p>
+          <p><strong>Roll No:</strong> {student.enrollmentNo}</p>
           <p><strong>Email:</strong> {student.email}</p>
           <p><strong>Department:</strong> {student.department}</p>
           <p><strong>Mobile:</strong> {student.mobile}</p>

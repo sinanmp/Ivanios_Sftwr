@@ -28,6 +28,7 @@ const AddStudent = () => {
     firstName: "",
     lastName: "",
     enrollmentNo: "",
+    admissionNo:"",
     gender: "",
     email: "",
     course: "",
@@ -256,6 +257,20 @@ const AddStudent = () => {
                   />
                   {errors.enrollmentNo && (
                     <p className="text-red-500 text-sm">{errors.enrollmentNo}</p>
+                  )}
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    placeholder="admission No*"
+                    className="p-3 border rounded-md w-full"
+                    value={formData.admissionNo}
+                    onChange={(e) =>
+                      setFormData({ ...formData, admissionNo: e.target.value })
+                    }
+                  />
+                  {errors.admissionNo && (
+                    <p className="text-red-500 text-sm">{errors.admissionNo}</p>
                   )}
                 </div>
                 <div>

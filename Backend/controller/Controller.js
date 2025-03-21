@@ -118,11 +118,12 @@ class Controller {
         name: data.firstName + ' ' + data.lastName,
         email: data.email,
         mobile: data.mobile,
-        rollNo: data.rollNo,
         enrollmentNo: data.enrollmentNo,  // Added enrollment number
+        admissionNo:data.admissionNo,
         profileImage: photo,               // Added image
         certificates: certificates,   // Added certificate
         batch: sbatch._id,
+        course:data.course,
       });
 
       // Save the student to the database
