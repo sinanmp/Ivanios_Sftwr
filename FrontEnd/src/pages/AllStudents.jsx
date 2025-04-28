@@ -126,7 +126,7 @@ const AllStudents = () => {
                             Admission No.
                           </th>
                           <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Email
+                            Pending Fees
                           </th>
                           <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Mobile
@@ -188,7 +188,11 @@ const AllStudents = () => {
                                 <div className="text-sm text-gray-900">{student.admissionNo}</div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-900">{student.email}</div>
+                                <div className="text-sm flex gap-1.5 text-red-500">{student.totalFees - student.feesPaid}
+                                  <button className="text-blue-600 hover:text-blue-900 transition-colors duration-150">
+                                    <FaEdit />
+                                  </button>
+                                </div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm text-gray-900">{student.mobile}</div>

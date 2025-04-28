@@ -9,7 +9,7 @@ import Button from "../components/ui/Button";
 import api from "../services/api";
 import Spinner from "../components/Spinner";
 import { toast } from "react-toastify";
-import { uploadFileToCloudinary } from "../services/Cloudinary";
+import { uploadFile } from "../services/FileUpload";
 
 const EditStudent = () => {
   const { id } = useParams();
@@ -53,7 +53,7 @@ const EditStudent = () => {
             batch: studentData.batch?._id || "",
             totalFees: studentData.totalFees || 0,
             feesPaid: studentData.feesPaid || 0,
-            certificates: studentData.certificates || []
+            certificates: []
           });
         } else {
           throw new Error("Failed to fetch student details");
@@ -120,12 +120,11 @@ const EditStudent = () => {
       for (const cert of formData.certificates) {
         if (cert.file instanceof File) {
           try {
-            // Upload new certificate to Cloudinary
-            const certData = await uploadFileToCloudinary(cert.file);
+            // Upload new certificate using the new FileUpload service
+            const certData = await uploadFile(cert.file);
             certificateUrls.push({
               type: cert.type,
-              otherType: cert.otherType || '',
-              url: certData.url,
+              url: certData.url,  
               publicId: certData.public_id
             });
           } catch (error) {
@@ -144,7 +143,7 @@ const EditStudent = () => {
       };
 
       const response = await api.updateStudent(id, studentData);
-      if (response && !response.error) {
+      if (response && response.error==false) {
         toast.success("Student updated successfully");
         navigate("/students/all");
       } else {
@@ -390,7 +389,7 @@ const EditStudent = () => {
                                 <option value="achievement">Achievement</option>
                                 <option value="identity">Identity Proof</option>
                                 <option value="other">Other</option>
-          </select>
+                    </select>
                               {cert.type === "other" && (
                                 <div className="mt-2">
                                   <label className="block text-xs text-gray-500 mb-1">Specify Type</label>

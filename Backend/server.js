@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDB from './database/connectDb.js';
 import adminRouter from './router/adminRouter.js';
+import { uploadMiddleware } from './services/cloudinaryUpload.js';
 
 dotenv.config();
 
@@ -32,9 +33,45 @@ app.get('/', (req, res) => {
 
 app.use('/api', adminRouter);
 
-// --- IMPORTANT ---
-// Local server only when not in production (for local dev)
-// Vercel will IGNORE app.listen and use "export default app"
+// Upload route
+app.post('/api/upload', uploadMiddleware.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        error: 'No file uploaded',
+        details: 'Please select a file to upload.',
+      });
+    }
+
+    // File successfully uploaded to Cloudinary via multer-storage-cloudinary
+    res.status(200).json({
+      url: req.file.path,      // secure_url from Cloudinary
+      public_id: req.file.filename, // public_id from Cloudinary
+    });
+  } catch (error) {
+    console.error('Upload error:', error);
+
+    if (error.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({
+        error: 'File too large',
+        details: 'Maximum file size is 10MB.',
+      });
+    }
+
+    if (error.message.includes('Invalid file type')) {
+      return res.status(400).json({
+        error: 'Invalid file type',
+        details: 'Only images, PDFs, and Word documents are allowed.',
+      });
+    }
+
+    res.status(500).json({
+      error: 'Failed to upload file',
+      details: error.message,
+    });
+  }
+});
+
 if (process.env.NODE_ENV !== 'production') {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {

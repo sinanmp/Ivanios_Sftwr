@@ -164,15 +164,16 @@ class Controller {
     const { page = 1, limit = 10, search = '' } = req.query;
     try {
       const students = await Student.find({
-        name: { $regex: search, $options: 'i' }, // For searching
+        name: { $regex: search, $options: 'i' },
       })
-        .skip((page - 1) * limit) // Pagination logic
-        .limit(parseInt(limit)); // Number of students per page
-
+        .populate('batch', 'batchName') // <-- populate batchName here
+        .skip((page - 1) * limit)
+        .limit(parseInt(limit));
+  
       const total = await Student.countDocuments({
         name: { $regex: search, $options: 'i' },
       });
-
+  
       res.status(200).json({
         error: false,
         students,
@@ -184,7 +185,7 @@ class Controller {
       res.status(500).json({ error: true, message: "Error fetching students" });
     }
   }
-
+  
 
   static async getStudentDetails(req, res) {
     try {
@@ -404,6 +405,101 @@ class Controller {
       res.status(500).json({
         error: true,
         message: "Error deleting student"
+      });
+    }
+  }
+
+  static async updateStudent(req, res) {
+    try {
+      const { id } = req.query;
+      const { name, email, mobile, enrollmentNo, admissionNo, certificates = [], batch, totalFees, feesPaid } = req.body;
+      console.log(certificates , "this is certificates")
+  
+      const student = await Student.findById(id);
+  
+      if (!student) {
+        return res.status(404).json({
+          error: true,
+          message: "Student not found"
+        });
+      }
+  
+      // Merge old certificates + new certificates
+      const updatedCertificates = [...student.certificates, ...certificates];
+  
+      // Update student fields
+      student.name = name;
+      student.email = email;
+      student.mobile = mobile;
+      student.enrollmentNo = enrollmentNo;
+      student.admissionNo = admissionNo;
+      student.certificates = updatedCertificates;
+      student.batch = batch;
+      student.totalFees = totalFees;
+      student.feesPaid = feesPaid;
+  
+      // Save updated student
+      await student.save();
+  
+      res.status(200).json({
+        error: false,
+        message: "Student updated successfully",
+        student
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        error: true,
+        message: "Error updating student"
+      });
+    }
+  }
+
+  static async addStudent(req, res) {
+    try {
+      const { name, email, mobile, enrollmentNo, admissionNo, profileImage, certificates, batch, totalFees, feesPaid } = req.body;
+
+      // Check if student with same email or enrollment number already exists
+      const existingStudent = await Student.findOne({
+        $or: [
+          { email: email },
+          { enrollmentNo: enrollmentNo }
+        ]
+      });
+
+      if (existingStudent) {
+        return res.status(400).json({
+          error: true,
+          message: "Student with this email or enrollment number already exists"
+        });
+      }
+
+      // Create new student
+      const newStudent = new Student({
+        name,
+        email,
+        mobile,
+        enrollmentNo,
+        admissionNo,
+        profileImage,
+        certificates,
+        batch,
+        totalFees,
+        feesPaid
+      });
+
+      await newStudent.save();
+
+      res.status(201).json({
+        error: false,
+        message: "Student added successfully",
+        student: newStudent
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        error: true,
+        message: "Error adding student"
       });
     }
   }
