@@ -1,19 +1,22 @@
-import { Router } from 'express'
-const router = Router()
-import controller from '../controller/Controller.js'
+import express from 'express';
+import Controller from '../controller/Controller.js';
 
+const router = express.Router();
 
-router.post("/adminLogin",controller.adminLogin)
-router.post("/addStudentToBatch",controller.addStudentToBatch)
-router.post("/createBatch",controller.createBatch)
+// Admin routes
+router.post("/adminLogin", Controller.adminLogin);
+router.post("/addStudentToBatch", Controller.addStudentToBatch);
+router.post("/createBatch", Controller.createBatch);
+router.get("/getStudentsInBatch", Controller.getStudentsInBatch);
+router.get("/getAllBatches", Controller.getAllBatches);
+router.get("/fetchStudents", Controller.fetchStudents);
+router.get("/getStudentDetails", Controller.getStudentDetails);
+router.delete("/deleteStudent", Controller.deleteStudent);
+router.get("/getBatchDetails", Controller.getBatchDetails);
+router.get("/getCourses", Controller.getCourses);
+router.post("/addCourse", Controller.addCourse);
+router.delete("/deleteCourse/:id", Controller.deleteCourse);
+router.put("/updateCourse/:id", Controller.updateCourse);
+router.get("/getCourseDetails", Controller.getCourseDetails);
 
-
-
-router.get("/getStudentsInBatch",controller.getStudentsInBatch)
-router.get("/getAllBatches",controller.getAllBatches)
-router.get("/fetchStudents",controller.fetchStudents)
-router.get("/getStudentDetails",controller.getStudentDetails)
-router.get("/getBatchDetails",controller.getBatchDetails)
-
-
-export default router   
+export default router;   

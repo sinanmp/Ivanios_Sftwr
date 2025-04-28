@@ -2,23 +2,32 @@ import mongoose from 'mongoose';
 
 const studentSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  email: { type: String, required: true},
-  enrollmentNo: { type: String , unique :true },
-  admissionNo: { type: String, unique: true },
+  email: { type: String, required: true, unique: true },
+  enrollmentNo: { type: String, required: true, unique: true },
+  admissionNo: { type: String, required: true, unique: true },
   mobile: { type: String, required: true },
   batch: { type: mongoose.Schema.Types.ObjectId, ref: 'Batch', required: true }, // Reference to Batch
-  course:{type:String},
+  totalFees: { type: Number, required: true }, // Total fees for the course
+  feesPaid: { type: Number, required: true }, // Amount paid by the student
   profileImage: { 
-    url:String,
+    url:String ,
     publicId:String
-  }, // To store the image URL or file path
+   }, // Now storing Cloudinary URL
   certificates: [
     {
-      fileName: String,
-      file: {
-        publicId:String ,
-        url:String
-      } // To store the certificate file URL or path  
+      type: {
+        type: String,
+        required: true
+      },
+      otherType: {
+        type: String,
+        default: ''
+      },
+      url: {
+        type: String, // Now storing Cloudinary URL
+        required: true
+      },
+      publicId:String
     }
   ]
 }, { timestamps: true });

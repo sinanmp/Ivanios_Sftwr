@@ -1,94 +1,187 @@
-import { useEffect, useState } from "react";
-import Swal from "sweetalert2";
-import {
-  FaHome,
-  FaChevronRight,
-  FaBell,
-  FaExpand,
-  FaPlus,
-  FaTrash,
-} from "react-icons/fa";
+import React, { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
+import TopNav from "../components/TopNav";
+import { Card, CardHeader, CardContent } from "../components/ui/Card";
+import { FaUser, FaIdCard, FaEnvelope, FaPhone, FaGraduationCap, FaMoneyBillWave, FaImage, FaFileAlt, FaTimes } from "react-icons/fa";
+import Button from "../components/ui/Button";
+import Input from "../components/ui/Input";
 import api from "../services/api";
-import { useNavigate } from "react-router-dom";
 import Spinner from "../components/Spinner";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 import { uploadFileToCloudinary } from "../services/Cloudinary";
 
 const AddStudent = () => {
-  const [certificates, setCertificates] = useState([]);
-  const navigate = useNavigate()
-  const [photo, setPhoto] = useState(null);
-  const [photoPreview, setPhotoPreview] = useState(null)
-  const [photoName, setPhotoName] = useState("No file chosen");
-  const [registrationDate, setRegistrationDate] = useState("");
-  const [batches, setBatches] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [batchBaseCourse, setBatchBaseCourse] = useState([])
+  const [loading, setLoading] = useState(false);
+  const [batches, setBatches] = useState([]);
+  const [selectedBatch, setSelectedBatch] = useState("");
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    name: "",
     enrollmentNo: "",
-    admissionNo:"",
-    gender: "",
+    admissionNo: "",
     email: "",
-    course: "",
     mobile: "",
-    parentsName: "",
-    parentsMobile: "",
-    address: "",
     batch: "",
-    courses: []
+    course: "",
+    totalFees: "",
+    feesPaid: "",
+    profileImage: null,
+    certificates: []
   });
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
+  const [previewImage, setPreviewImage] = useState(null);
+  const [certificateNames, setCertificateNames] = useState([]);
+
+
 
   useEffect(() => {
+    fetchBatches();
+  }, []);
+
     const fetchBatches = async () => {
       try {
-        setLoading(true)
-        const result = await api.getAllBatches()
-        console.log(result)
-        setBatches(result.batches)
-      } catch (error) {
-        console.log(error)
-      } finally {
-        setLoading(false)
+      const response = await api.getAllBatches();
+      if (response && !response.error) {
+        setBatches(response.batches || []);
+      } else {
+        throw new Error("Failed to fetch batches");
       }
+    } catch (error) {
+      console.error("Error fetching batches:", error);
+      toast.error(error.response?.data?.message || "Failed to fetch batches");
     }
-    fetchBatches()
-  }, [])
+  };
 
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ""
+      }));
+    }
+  };
 
+  const handleCourseChange = (e) => {
+    const courseId = e.target.value;
+    const selectedBatchData = batches.find(b => b._id === selectedBatch);
+    const selectedCourse = selectedBatchData?.courses.find(c => c._id === courseId);
+
+    setFormData(prev => ({
+      ...prev,
+      course: courseId,
+      totalFees: selectedCourse?.fees || ""
+    }));
+  };
+
+  const handleBatchChange = (e) => {
+    const batchId = e.target.value;
+    setSelectedBatch(batchId);
+    setFormData(prev => ({
+      ...prev,
+      batch: batchId,
+      course: "", // Reset course when batch changes
+      totalFees: "" // Reset total fees when batch changes
+    }));
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData(prev => ({
+        ...prev,
+        profileImage: file
+      }));
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const addNewCertificate = () => {
+    setFormData(prev => ({
+      ...prev,
+      certificates: [...prev.certificates, {
+        type: "",
+        otherType: "",
+        file: null
+      }]
+    }));
+  };
+
+  const handleCertificateUpload = (index, e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData(prev => ({
+        ...prev,
+        certificates: prev.certificates.map((cert, i) => 
+          i === index ? { ...cert, file } : cert
+        )
+      }));
+    }
+  };
+
+  const updateCertificateType = (index, type) => {
+    setFormData(prev => ({
+      ...prev,
+      certificates: prev.certificates.map((cert, i) => 
+        i === index ? { ...cert, type, otherType: type === "other" ? cert.otherType : "" } : cert
+      )
+    }));
+  };
+
+  const updateOtherType = (index, otherType) => {
+    setFormData(prev => ({
+      ...prev,
+      certificates: prev.certificates.map((cert, i) => 
+        i === index ? { ...cert, otherType } : cert
+      )
+    }));
+  };
+
+  const removeCertificate = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      certificates: prev.certificates.filter((_, i) => i !== index)
+    }));
+  };
 
   const validateForm = () => {
-    let newErrors = {};
-    if (!formData.firstName.trim())
-      newErrors.firstName = "First name is required";
-    if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
-    if (!formData.batch) newErrors.batch = "batch name is required";
-    if (!formData.enrollmentNo.trim()) newErrors.enrollmentNo = "Roll No is required";
-    if (!formData.gender) newErrors.gender = "Gender is required";
-    if (
-      !formData.email.trim() ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
-    )
-      newErrors.email = "Valid email is required";
-    if (!formData.mobile.trim() || !/^\d{10}$/.test(formData.mobile))
-      newErrors.mobile = "Valid 10-digit mobile number is required";
-    if (!formData.course)
-      newErrors.course = "course selection is required";
-    if (!formData.parentsName.trim())
-      newErrors.parentsName = "Parent's name is required";
-    if (
-      !formData.parentsMobile.trim() ||
-      !/^\d{10}$/.test(formData.parentsMobile)
-    )
-      newErrors.parentsMobile =
-        "Valid 10-digit parent's mobile number is required";
-    if (!formData.address.trim()) newErrors.address = "Address is required";
-    if (photo === null) newErrors.photo = "Please upload a photo";
-    if (certificates.length === 0)
-      newErrors.certificates = "Please add at least one certificate";
+    const newErrors = {};
+    if (!formData.name) newErrors.name = "Name is required";
+    if (!formData.enrollmentNo) newErrors.enrollmentNo = "Enrollment number is required";
+    if (!formData.admissionNo) newErrors.admissionNo = "Admission number is required";
+    if (!formData.email) newErrors.email = "Email is required";
+    if (!formData.mobile) newErrors.mobile = "Mobile number is required";
+    if (!formData.batch) newErrors.batch = "Batch is required";
+    if (!formData.course) newErrors.course = "Course is required";
+    if (!formData.totalFees) newErrors.totalFees = "Total fees is required";
+    if (!formData.feesPaid) newErrors.feesPaid = "Fees paid is required";
+
+    // Validate certificates
+    if (formData.certificates.length > 0) {
+      formData.certificates.forEach((cert, index) => {
+        if (!cert.type) {
+          newErrors[`certificateType-${index}`] = "Certificate type is required";
+        }
+        if (cert.type === "other" && !cert.otherType) {
+          newErrors[`certificateOtherType-${index}`] = "Please specify certificate type";
+        }
+        if (!cert.file) {
+          newErrors[`certificateFile-${index}`] = "Certificate file is required";
+        }
+      });
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -96,422 +189,471 @@ const AddStudent = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) {
+      // Show error toast for validation errors
+      toast.error("Please fill in all required fields correctly");
+      return;
+    }
+
     try {
-      setLoading(true)
-      const photoResult = await uploadFileToCloudinary(photo)
-      const certificatesResult = await Promise.all(
-        certificates.map(async (cer) => {
-          const result = await uploadFileToCloudinary(cer.file);
-          console.log("this is result:", result);
+      setLoading(true);
+      
+      // Ensure totalFees is set from the selected course
+      const selectedBatchData = batches.find(b => b._id === selectedBatch);
+      const selectedCourse = selectedBatchData?.courses.find(c => c._id === formData.course);
+      
+      if (!selectedCourse) {
+        toast.error("Please select a valid course");
+        return;
+      }
 
-          return {
-            fileName: cer.type,
-            file: {
-              url: result?.url, // Ensure secure URL is used
-              publicId: result?.public_id, // Get public ID for future deletion
-            },
+      // Upload profile image to Cloudinary if exists
+      let profileImage = {};
+      if (formData.profileImage) {
+        try {
+          const imageData = await uploadFileToCloudinary(formData.profileImage);
+          profileImage = {
+            url: imageData.url,
+            publicId: imageData.public_id
           };
-        })
-      );
-      console.log("Final Uploaded Certificates:", certificatesResult);
-
-
-      if (validateForm()) {
-        setFormData(({ courses, ...rest }) => rest);
-        console.log("Form Submitted Successfully", formData);
-        const result = await api.addStudentToBatch(formData, certificatesResult, photoResult)
-        console.log(result)
-        if (result.error) { 
-          Swal.fire({
-            icon: "error",
-            title: "Error Adding Student",
-            text: "Something went wrong on the server. Please try again later.",
-          });
-        } else {
-          setFormData({})
-          navigate('/students/all')
-          Swal.fire({
-            icon: "success",
-            title: "Addedd Successfully",
-            text: "Student addded successfully ..",
-          });
+        } catch (error) {
+          toast.error("Failed to upload profile image");
+          return;
         }
+      }
+
+      // Upload certificates to Cloudinary if they exist
+      const certificateUrls = [];
+      if (formData.certificates && formData.certificates.length > 0) {
+        for (const cert of formData.certificates) {
+          if (cert.file) {
+            try {
+              const certData = await uploadFileToCloudinary(cert.file);
+              certificateUrls.push({
+                type: cert.type,
+                otherType: cert.otherType || '',
+                url: certData.url,
+                publicId: certData.public_id
+              });
+            } catch (error) {
+              toast.error(`Failed to upload certificate: ${cert.type || 'Unknown type'}`);
+              return;
+            }
+          }
+        }
+      }
+
+      const studentData = {
+        ...formData,
+        totalFees: selectedCourse.fees,
+        feesPaid: parseInt(formData.feesPaid) || 0,
+        profileImage: profileImage,
+        certificates: certificateUrls
+      };
+
+      const response = await api.addStudentToBatch(studentData);
+      if (response && !response.error) {
+        toast.success("Student added successfully");
+        navigate("/students/all");
       } else {
-        console.log("form is not validated")
+        throw new Error(response?.message || "Failed to add student");
       }
     } catch (error) {
-      console.log(error)
+      console.error("Error adding student:", error);
+      
+      // Handle specific error cases
+      if (error.response?.data?.message?.includes("duplicate key")) {
+        if (error.response.data.message.includes("email")) {
+          setErrors(prev => ({ ...prev, email: "Email already exists" }));
+          toast.error("This email is already registered");
+        } else if (error.response.data.message.includes("enrollmentNo")) {
+          setErrors(prev => ({ ...prev, enrollmentNo: "Enrollment number already exists" }));
+          toast.error("This enrollment number is already registered");
+        } else if (error.response.data.message.includes("admissionNo")) {
+          setErrors(prev => ({ ...prev, admissionNo: "Admission number already exists" }));
+          toast.error("This admission number is already registered");
+        }
+      } else {
+        toast.error(error.response?.data?.message || "Failed to add student");
+      }
     } finally {
-      setLoading(false)
-    }
-
-  };
-
-
-  const addCertificate = () => {
-    setCertificates([
-      ...certificates,
-      { type: "", file: null, preview: null, fileName: "No file chosen" },
-    ]);
-  };
-
-  const removeCertificate = (index) => {
-    setCertificates(certificates.filter((_, i) => i !== index));
-  };
-
-  const updateCertificate = (index, field, value) => {
-    const updatedCertificates = [...certificates];
-
-    if (field === "file") {
-      const file = value;
-      updatedCertificates[index].file = file;
-      updatedCertificates[index].fileName = file ? file.name : "No file chosen";
-      updatedCertificates[index].preview = file
-        ? URL.createObjectURL(file)
-        : null;
-    } else {
-      updatedCertificates[index][field] = value;
-    }
-
-    setCertificates(updatedCertificates);
-  };
-
-  const handlePhotoUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setPhotoPreview(URL.createObjectURL(file));
-      setPhoto(file)
-      setPhotoName(file.name);
-    }
-  };
-
-  const handleNumberInput = (e, field) => {
-    const value = e.target.value.replace(/[^0-9]/g, "");
-    setFormData({ ...formData, [field]: value });
-    if (value.length > 10) {
-      setFormData({ ...formData, [field]: value.slice(0, 10) });
+      setLoading(false);
     }
   };
 
   return (
-    <>
-      {loading && <Spinner />}
-      <div className="flex fixed top-0 left-0 w-full h-screen bg-gray-100">
+    <div className="flex fixed top-0 left-0 w-full h-screen bg-gradient-to-br from-gray-50 to-gray-100">
         <Sidebar />
-        <div className="flex-1 flex flex-col">
-          <div className="flex justify-end items-center bg-white px-6 py-4 shadow-md w-full">
-            <div className="flex items-center gap-4">
-              <img src="/us-flag.png" alt="Country" className="w-6 h-4" />
-              <FaExpand className="text-xl cursor-pointer text-gray-600" />
-              <FaBell className="text-xl cursor-pointer text-gray-600" />
-            </div>
+      <div className="flex-1 flex flex-col md:ml-64" style={{ marginLeft: 'var(--sidebar-width, 16rem)' }}>
+        <TopNav />
+        <main className="flex-1 overflow-y-auto p-6 pt-24">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-800">Add New Student</h1>
+            <p className="text-gray-600 mt-2">Fill in the details to add a new student</p>
           </div>
-          <div className="flex-1 overflow-y-auto p-6">
-            <div className="flex items-center text-gray-600 space-x-2 text-lg font-medium">
-              <FaHome className="text-blue-500" />
-              <FaChevronRight />
-              <span>Students</span>
-              <FaChevronRight />
-              <span className="text-blue-500">Add Student</span>
-            </div>
-            <div className="mt-6 bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-xl font-semibold mb-4">Add Student</h2>
-              <form className="grid grid-cols-2 gap-6" onSubmit={handleSubmit}>
-                <div>
-                  <input
-                    type="text"
-                    placeholder="First name*"
-                    className="p-3 border rounded-md w-full"
-                    value={formData.firstName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, firstName: e.target.value })
-                    }
-                  />
-                  {errors.firstName && (
-                    <p className="text-red-500 text-sm">{errors.firstName}</p>
-                  )}
-                </div>
-                <div>
-                  <input
-                    type="text"
-                    placeholder="Last name"
-                    className="p-3 border rounded-md w-full"
-                    value={formData.lastName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, lastName: e.target.value })
-                    }
-                  />
-                  {errors.lastName && (
-                    <p className="text-red-500 text-sm">{errors.lastName}</p>
-                  )}
-                </div>
-                <div>
-                  <input
-                    type="text"
-                    placeholder="enrollment No*"
-                    className="p-3 border rounded-md w-full"
-                    value={formData.enrollmentNo}
-                    onChange={(e) =>
-                      setFormData({ ...formData, enrollmentNo: e.target.value })
-                    }
-                  />
-                  {errors.enrollmentNo && (
-                    <p className="text-red-500 text-sm">{errors.enrollmentNo}</p>
-                  )}
-                </div>
-                <div>
-                  <input
-                    type="text"
-                    placeholder="admission No*"
-                    className="p-3 border rounded-md w-full"
-                    value={formData.admissionNo}
-                    onChange={(e) =>
-                      setFormData({ ...formData, admissionNo: e.target.value })
-                    }
-                  />
-                  {errors.admissionNo && (
-                    <p className="text-red-500 text-sm">{errors.admissionNo}</p>
-                  )}
-                </div>
-                <div>
-                  <select
-                    className="p-3 border rounded-md w-full"
-                    value={JSON.stringify({ id: formData.batch, courses: formData.courses })}
-                    onChange={(e) => {
-                      const selectedBatch = JSON.parse(e.target.value);
-                      setFormData({ ...formData, batch: selectedBatch.id, courses: selectedBatch.courses });
-                    }
 
-                    }
-                  >
-                    <option value="">Select Batch*</option>
-                    {batches.map((batch, index) => (
-                      <option key={index} value={JSON.stringify({ id: batch._id, courses: batch.courses })}>
+          {batches.length === 0 ? (
+            <Card variant="elevated" hoverable>
+              <CardContent className="text-center py-8">
+                <FaGraduationCap className="text-gray-400 text-5xl mx-auto mb-4" />
+                <h2 className="text-xl font-semibold text-gray-800 mb-2">No Batches Available</h2>
+                <p className="text-gray-600 mb-4">You need to create at least one batch before adding students.</p>
+                <Button
+                  variant="primary"
+                  onClick={() => navigate("/batches/add")}
+                  className="inline-flex items-center gap-2"
+                >
+                  <FaGraduationCap />
+                  Create Batch
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card variant="elevated" hoverable>
+              <CardHeader
+                title="Student Information"
+                subtitle="Enter the student's details below"
+              />
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Name */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Name <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        placeholder="Enter student's name"
+                        icon={<FaUser className="text-gray-400" />}
+                        error={errors.name}
+                      />
+            </div>
+
+                    {/* Enrollment Number */}
+                <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Enrollment Number <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                    type="text"
+                        name="enrollmentNo"
+                        value={formData.enrollmentNo}
+                        onChange={handleChange}
+                        placeholder="Enter enrollment number"
+                        icon={<FaIdCard className="text-gray-400" />}
+                        error={errors.enrollmentNo}
+                      />
+                </div>
+
+                    {/* Admission Number */}
+                <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Admission Number <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                    type="text"
+                        name="admissionNo"
+                        value={formData.admissionNo}
+                        onChange={handleChange}
+                        placeholder="Enter admission number"
+                        icon={<FaIdCard className="text-gray-400" />}
+                        error={errors.admissionNo}
+                      />
+                </div>
+
+                    {/* Email */}
+                <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Email <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="Enter email address"
+                        icon={<FaEnvelope className="text-gray-400" />}
+                        error={errors.email}
+                      />
+                </div>
+
+                    {/* Mobile */}
+                <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Mobile Number <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        type="tel"
+                        name="mobile"
+                        value={formData.mobile}
+                        onChange={handleChange}
+                        placeholder="Enter mobile number"
+                        icon={<FaPhone className="text-gray-400" />}
+                        error={errors.mobile}
+                      />
+                </div>
+
+                    {/* Batch */}
+                <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Batch <span className="text-red-500">*</span>
+                      </label>
+                  <select
+                        name="batch"
+                        value={formData.batch}
+                        onChange={handleBatchChange}
+                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                          errors.batch ? "border-red-500" : "border-gray-200"
+                        }`}
+                      >
+                        <option value="">Select Batch</option>
+                        {batches.map((batch) => (
+                          <option key={batch._id} value={batch._id}>
                         {batch.batchName}
                       </option>
                     ))}
                   </select>
                   {errors.batch && (
-                    <p className="text-red-500 text-sm">{errors.batch}</p>
+                        <p className="mt-1 text-sm text-red-500">{errors.batch}</p>
                   )}
                 </div>
+
+                    {/* Course */}
                 <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Course <span className="text-red-500">*</span>
+                      </label>
                   <select
-                    className={`p-3 border ${!formData.batch ? "opacity-20" : ""} rounded-md w-full`}
-                    value={formData.course}
-                    onChange={(e) => setFormData({ ...formData, course: e.target.value })}
-                    disabled={!formData.batch}
-                  >
-                    <option value="">Select Course*</option>
-                    {formData.courses.map((item, index) => (
-                      <option key={index} value={item}>
-                        {item}
+                        name="course"
+                        value={formData.course}
+                        onChange={handleCourseChange}
+                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                          errors.course ? "border-red-500" : "border-gray-200"
+                        }`}
+                        disabled={!selectedBatch}
+                      >
+                        <option value="">Select Course</option>
+                        {selectedBatch && batches.find(b => b._id === selectedBatch)?.courses.map((course) => (
+                          <option key={course._id} value={course._id}>
+                            {course.name} - ₹{course.fees}
                       </option>
                     ))}
                   </select>
-
                   {errors.course && (
-                    <p className="text-red-500 text-sm">{errors.course}</p>
+                        <p className="mt-1 text-sm text-red-500">{errors.course}</p>
                   )}
                 </div>
 
-
+                    {/* Total Fees */}
                 <div>
-                  <select
-                    className="p-3 border rounded-md w-full"
-                    value={formData.gender}
-                    onChange={(e) =>
-                      setFormData({ ...formData, gender: e.target.value })
-                    }
-                  >
-                    <option value="">Gender*</option>
-                    <option>Male</option>
-                    <option>Female</option>
-                  </select>
-                  {errors.gender && (
-                    <p className="text-red-500 text-sm">{errors.gender}</p>
-                  )}
-                </div>
-                <div>
-                  <input
-                    type="email"
-                    placeholder="Email*"
-                    className="p-3 border rounded-md w-full"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                  />
-                  {errors.email && (
-                    <p className="text-red-500 text-sm">{errors.email}</p>
-                  )}
-                </div>
-                <div>
-                  <input
-                    type="text"
-                    placeholder="Mobile*"
-                    className="p-3 border rounded-md w-full"
-                    value={formData.mobile}
-                    onChange={(e) => handleNumberInput(e, "mobile")}
-                  />
-                  {errors.mobile && (
-                    <p className="text-red-500 text-sm">{errors.mobile}</p>
-                  )}
-                </div>
-                <div>
-                  <input
-                    type="date"
-                    className="cursor-pointer p-3 border rounded-md text-gray-700 w-full"
-                    value={registrationDate}
-                    onChange={(e) => setRegistrationDate(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <input
-                    type="text"
-                    placeholder="Parents name*"
-                    className="p-3 border rounded-md w-full"
-                    value={formData.parentsName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, parentsName: e.target.value })
-                    }
-                  />
-                  {errors.parentsName && (
-                    <p className="text-red-500 text-sm">{errors.parentsName}</p>
-                  )}
-                </div>
-                <div>
-                  <input
-                    type="text"
-                    placeholder="Parents Mobile Number"
-                    className="p-3 border rounded-md w-full"
-                    value={formData.parentsMobile}
-                    onChange={(e) => handleNumberInput(e, "parentsMobile")}
-                  />
-                  {errors.parentsMobile && (
-                    <p className="text-red-500 text-sm">{errors.parentsMobile}</p>
-                  )}
-                </div>
-                <textarea
-                  placeholder="Address*"
-                  className="w-full p-2 border rounded-md"
-                  value={formData.address}
-                  onChange={(e) =>
-                    setFormData({ ...formData, address: e.target.value })
-                  }
-                ></textarea>
-                {errors.address && (
-                  <p className="text-red-500 text-sm">{errors.address}</p>
-                )}
-                <div className="w-full flex">
-                  <div className="w-full">
-
-                    <div>
-                      <label className="block text-gray-700 font-medium mb-1">
-                        Upload Photo*
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Total Fees <span className="text-red-500">*</span>
                       </label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          className="border p-3 w-full rounded-md pr-24"
-                          value={photoName}
-                          readOnly
-                        />
-                        <label className="absolute right-1 top-1/2 transform -translate-y-1/2 cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition">
-                          Choose File
+                      <Input
+                        type="number"
+                        name="totalFees"
+                        value={formData.totalFees}
+                        onChange={handleChange}
+                        placeholder="Total fees will be set automatically"
+                        icon={<FaMoneyBillWave className="text-gray-400" />}
+                        error={errors.totalFees}
+                        readOnly
+                      />
+                      {formData.totalFees && (
+                        <p className="mt-1 text-sm text-gray-500">
+                          Total Fees: ₹{formData.totalFees}
+                        </p>
+                  )}
+                </div>
+
+                    {/* Fees Paid */}
+                <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Fees Paid <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        type="number"
+                        name="feesPaid"
+                        value={formData.feesPaid}
+                        onChange={handleChange}
+                        placeholder="Enter fees paid"
+                        icon={<FaMoneyBillWave className="text-gray-400" />}
+                        error={errors.feesPaid}
+                  />
+                </div>
+
+                    {/* Profile Image Upload */}
+                    <div className="space-y-4">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Profile Image
+                      </label>
+                      <div className="flex items-center space-x-4">
+                        <div className="relative">
+                          {previewImage ? (
+                            <div className="relative">
+                              <img
+                                src={previewImage}
+                                alt="Profile preview"
+                                className="w-32 h-32 rounded-full object-cover border-2 border-gray-200"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setPreviewImage(null);
+                                  setFormData(prev => ({ ...prev, profileImage: null }));
+                                }}
+                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                              >
+                                <FaTimes size={12} />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-300">
+                              <FaImage className="text-gray-400 text-2xl" />
+                            </div>
+                  )}
+                </div>
+                <div>
                           <input
                             type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload}
                             className="hidden"
-                            onChange={handlePhotoUpload}
+                            id="profileImage"
                           />
+                          <label
+                            htmlFor="profileImage"
+                            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer"
+                          >
+                            <FaImage className="mr-2" />
+                            Upload Image
                         </label>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-                <div>
-                  {errors.photo && (
-                    <p className="text-red-500 text-sm">{errors.photo}</p>
-                  )}
-                  {photoName !== "No file chosen" && (
-                    <div className="">
-                      <p className="text-gray-600 text-sm">Preview:</p>
-                      <img
-                        src={photoPreview}
-                        alt="Student Preview"
-                        className="w-32 h-32 object-cover border rounded-md mt-1"
+
+                    {/* Certificates Upload */}
+                    <div className="space-y-4">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Certificates
+                      </label>
+                      <div className="space-y-4">
+                        {formData.certificates.map((cert, index) => (
+                          <div key={index} className="flex flex-col space-y-2 p-3 bg-gray-50 rounded-lg">
+                            <div className="flex items-center space-x-4">
+                              <FaFileAlt className="text-gray-400" />
+                              <div className="flex-1">
+                                <label className="block text-xs text-gray-500 mb-1">Certificate Type <span className="text-red-500">*</span></label>
+                                <select
+                                  value={cert.type}
+                                  onChange={(e) => updateCertificateType(index, e.target.value)}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  required
+                                >
+                                  <option value="">Select Type</option>
+                                  <option value="academic">Academic</option>
+                                  <option value="professional">Professional</option>
+                                  <option value="achievement">Achievement</option>
+                                  <option value="identity">Identity Proof</option>
+                                  <option value="other">Other</option>
+                                </select>
+                                {cert.type === "other" && (
+                                  <div className="mt-2">
+                                    <label className="block text-xs text-gray-500 mb-1">Specify Type <span className="text-red-500">*</span></label>
+                                    <input
+                                      type="text"
+                                      value={cert.otherType}
+                                      onChange={(e) => updateOtherType(index, e.target.value)}
+                                      placeholder="Enter certificate type"
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                      required
                       />
                     </div>
                   )}
                 </div>
-                <div className="col-span-2">
-                  <h3 className="text-lg font-semibold mb-2">Certificates</h3>
-                  {certificates.map((certificate, index) => (
-                    <div key={index} className="flex items-center gap-4 mb-3">
-                      <select
-                        className="p-3 border rounded-md flex-1"
-                        value={certificate.type}
-                        onChange={(e) =>
-                          updateCertificate(index, "type", e.target.value)
-                        }
-                      >
-                        <option value="">Select Certificate</option>
-                        <option value="Birth Certificate">
-                          Birth Certificate
-                        </option>
-                        <option value="ID Proof">ID Proof</option>
-                        <option value="Previous Marksheets">
-                          Previous Marksheets
-                        </option>
-                        <option value="Other">Other</option>
-                      </select>
-                      <div className="relative flex-1">
-                        <input
-                          type="text"
-                          className="border p-3 w-full rounded-md pr-24"
-                          value={certificate.fileName}
-                          readOnly
-                        />
-                        <label className="absolute right-1 top-1/2 transform -translate-y-1/2 cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition">
-                          Choose File
+                              <div className="flex-1">
+                                <label className="block text-xs text-gray-500 mb-1">Certificate File <span className="text-red-500">*</span></label>
+                                <div className="flex items-center space-x-2">
                           <input
                             type="file"
+                                    accept=".pdf,.doc,.docx"
+                                    onChange={(e) => handleCertificateUpload(index, e)}
                             className="hidden"
-                            onChange={(e) =>
-                              updateCertificate(index, "file", e.target.files[0])
-                            }
-                          />
+                                    id={`certificate-${index}`}
+                                  />
+                                  <label
+                                    htmlFor={`certificate-${index}`}
+                                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer"
+                                  >
+                                    <FaFileAlt className="mr-2" />
+                                    {cert.file ? "Change File" : "Upload File"}
                         </label>
+                                  {cert.file && (
+                                    <span className="text-xs text-gray-500">
+                                      {cert.file.name}
+                                    </span>
+                                  )}
+                                </div>
                       </div>
                       <button
                         type="button"
-                        className="cursor-pointer text-red-500 hover:text-red-700"
                         onClick={() => removeCertificate(index)}
+                                className="text-red-500 hover:text-red-700 mt-6"
                       >
-                        <FaTrash />
+                                <FaTimes />
                       </button>
+                            </div>
                     </div>
                   ))}
                   <button
                     type="button"
-                    className="flex items-center bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition"
-                    onClick={addCertificate}
+                          onClick={addNewCertificate}
+                          className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
-                    <FaPlus className="mr-2" /> Add Certificate
+                          <FaFileAlt className="mr-2" />
+                          Add Certificate
                   </button>
-                  {errors.certificates && (
-                    <p className="text-red-500 text-sm">{errors.certificates}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Error Summary */}
+                  {Object.keys(errors).length > 0 && (
+                    <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                      <h3 className="text-sm font-medium text-red-800">Please fix the following errors:</h3>
+                      <ul className="mt-2 text-sm text-red-700">
+                        {Object.entries(errors).map(([field, message]) => (
+                          <li key={field}>{message}</li>
+                        ))}
+                      </ul>
+                    </div>
                   )}
+
+                  {/* Submit Button */}
+                  <div className="flex justify-end">
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      size="lg"
+                      disabled={loading}
+                      className="flex items-center gap-2"
+                    >
+                      {loading ? <Spinner size="sm" /> : <FaUser />}
+                      {loading ? "Adding Student..." : "Add Student"}
+                    </Button>
                 </div>
-                <button className="col-span-2 bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition">
-                  Submit
-                </button>
               </form>
-            </div>
-          </div>
-        </div>
+              </CardContent>
+            </Card>
+          )}
+        </main>
       </div>
-    </>
+    </div>
   );
 };
 

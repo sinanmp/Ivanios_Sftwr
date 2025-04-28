@@ -1,190 +1,188 @@
-import { useEffect, useState } from "react";
-import logo from "../assets/logo.png.png";
-import { NavLink, useLocation } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import {
-  FaAngleLeft,
-  FaAngleRight,
-  FaUsers,
   FaHome,
-  FaAngleDown,
+  FaUserGraduate,
+  FaUsers,
+  FaBars,
+  FaTimes,
+  FaChevronDown,
+  FaChevronRight,
+  FaChalkboardTeacher,
+  FaBook,
 } from "react-icons/fa";
-import { MdOutlineSchool } from "react-icons/md";
 
 const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(true);
-  const [studentsOpen, setStudentsOpen] = useState(false);
-  const [batchesOpen, setBatchesOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [openDropdowns, setOpenDropdowns] = useState({
+    students: false,
+    batches: false,
+  });
   const location = useLocation();
 
+  // Keep dropdowns open if their sub-items are active
   useEffect(() => {
-    if (
-      location.pathname.startsWith("/students") ||
-      location.pathname.startsWith("/studentDetails")
-    ) {
-      setStudentsOpen(true);
-      setBatchesOpen(false);
-    } else if (
-      location.pathname.startsWith("/batches") ||
-      location.pathname.startsWith("/batchDetails")
-    ) {
-      setBatchesOpen(true);
-      setStudentsOpen(false);
-    }
+    const path = location.pathname;
+    setOpenDropdowns({
+      students: path.startsWith('/students/'),
+      batches: path.startsWith('/batches/'),
+    });
   }, [location.pathname]);
 
-  function toggleIsOpen() {
-    setIsOpen(!isOpen);
-  }
+  const toggleDropdown = (dropdown) => {
+    setOpenDropdowns((prev) => ({
+      ...prev,
+      [dropdown]: !prev[dropdown],
+    }));
+  };
 
-  function handleParentClick(type) {
-    if (!isOpen) {
-      setIsOpen(true);
-    }
-    if (type === "students") {
-      setStudentsOpen(!studentsOpen);
-      setBatchesOpen(false);
-    } else if (type === "batches") {
-      setBatchesOpen(!batchesOpen);
-      setStudentsOpen(false);
-    }
-  }
+  const menuItems = [
+    {
+      path: "/dashboard",
+      icon: <FaHome className="w-5 h-5" />,
+      label: "Dashboard",
+    },
+    {
+      type: "dropdown",
+      icon: <FaUserGraduate className="w-5 h-5" />,
+      label: "Students",
+      key: "students",
+      items: [
+        { path: "/students/all", label: "All Students" },
+        { path: "/students/add", label: "Add Student" },
+      ],
+    },
+    {
+      type: "dropdown",
+      icon: <FaUsers className="w-5 h-5" />,
+      label: "Batches",
+      key: "batches",
+      items: [
+        { path: "/batches/all", label: "All Batches" },
+        { path: "/batches/add", label: "Add Batch" },
+      ],
+    },
+    {
+      type: "dropdown",
+      icon: <FaBook className="w-5 h-5" />,
+      label: "Courses",
+      key: "courses",
+      items: [
+        { path: "/courses", label: "All Courses" },
+        { path: "/courses/add", label: "Add Course" },
+      ],
+    },
+  ];
+
+  const isSubItemActive = (items) => {
+    return items.some(item => location.pathname === item.path);
+  };
 
   return (
-    <div className="flex h-screen">
-      <div
-        className={`bg-white h-screen p-4 shadow-lg relative ${
-          isOpen ? "w-64" : "w-16"
-        } transition-all duration-300`}
+    <>
+      {/* Mobile Toggle Button */}
+      <button
+        className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-white shadow-lg md:hidden cursor-pointer"
+        onClick={() => setIsOpen(!isOpen)}
       >
-        <button
-          onClick={toggleIsOpen}
-          className="cursor-pointer absolute top-2 -right-12 bg-blue-500 text-white p-2 rounded-full shadow-md transition-all"
-        >
-          {isOpen ? <FaAngleLeft size={20} /> : <FaAngleRight size={20} />}
-        </button>
+        {isOpen ? <FaTimes className="w-6 h-6" /> : <FaBars className="w-6 h-6" />}
+      </button>
 
-        <div className="flex items-center justify-center space-x-2">
-          {isOpen && <img src={logo} className="h-48" alt="" />}
-        </div>
+      {/* Sidebar */}
+      <div
+        className={`fixed top-0 left-0 h-full w-64 bg-gradient-to-b from-gray-900 to-gray-800 text-white transform transition-transform duration-300 ease-in-out z-40 ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0`}
+        style={{ '--sidebar-width': '16rem' }}
+      >
+        <div className="flex flex-col h-full">
+          {/* Logo */}
+          <div className="p-6">
+            <h1 className="text-2xl font-bold text-white">Student Portal</h1>
+          </div>
 
-        <nav className="space-y-2">
-          <NavLink
-            to="/dashboard"
-            className={({ isActive }) =>
-              `flex items-center p-2 space-x-2 rounded-md ${
-                isActive ? "bg-blue-100 text-blue-600" : "hover:bg-gray-200"
-              }`
-            }
-          >
-            <FaHome size={20} />
-            {isOpen && <span>Dashboard</span>}
-          </NavLink>
-
-          <div>
-            <button
-              onClick={() => handleParentClick("students")}
-              className={`flex cursor-pointer justify-between items-center w-full p-2 rounded-md ${
-                location.pathname.startsWith("/students") ||
-                location.pathname.startsWith("/studentDetails")
-                  ? "text-blue-600"
-                  : "text-black"
-              } hover:bg-gray-200`}
-            >
-              <div className="flex items-center space-x-2">
-                <FaUsers size={20} />
-                {isOpen && <span>Students</span>}
-              </div>
-              {isOpen && (studentsOpen ? <FaAngleDown /> : <FaAngleRight />)}
-            </button>
-
-            {studentsOpen && isOpen && (
-              <div className="ml-6 space-y-1">
-                <NavLink
-                  to="/students/all"
-                  className={`block p-2 rounded-md hover:bg-gray-200 ${
-                    location.pathname.startsWith("/students/all")
-                      ? "text-blue-600"
-                      : "text-black"
-                  }`}
-                >
-                  All Students
-                </NavLink>
-                <NavLink
-                  to="/students/add"
-                  className={`block p-2 rounded-md hover:bg-gray-200 ${
-                    location.pathname.startsWith("/students/add")
-                      ? "text-blue-600"
-                      : "text-black"
-                  }`}
-                >
-                  Add Student
-                </NavLink>
-                {location.pathname.startsWith("/studentDetails/") && (
-                  <NavLink
-                    // to={location.pathname}
-                    className="block p-2 rounded-md text-blue-600 bg-blue-100"
+          {/* Navigation */}
+          <nav className="flex-1 px-4 space-y-2">
+            {menuItems.map((item) => (
+              <div key={item.path || item.key}>
+                {item.type === "dropdown" ? (
+                  <div>
+                    <button
+                      onClick={() => toggleDropdown(item.key)}
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 cursor-pointer ${
+                        openDropdowns[item.key] || isSubItemActive(item.items)
+                          ? "bg-blue-600 text-white shadow-lg"
+                          : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        <span className="mr-3">{item.icon}</span>
+                        <span className="font-medium">{item.label}</span>
+                      </div>
+                      {openDropdowns[item.key] || isSubItemActive(item.items) ? (
+                        <FaChevronDown className="w-4 h-4" />
+                      ) : (
+                        <FaChevronRight className="w-4 h-4" />
+                      )}
+                    </button>
+                    {(openDropdowns[item.key] || isSubItemActive(item.items)) && (
+                      <div className="pl-12 py-2 space-y-1">
+                        {item.items.map((subItem) => (
+                          <Link
+                            key={subItem.path}
+                            to={subItem.path}
+                            className={`block px-4 py-2 rounded-lg transition-all duration-200 ${
+                              location.pathname === subItem.path
+                                ? "bg-blue-600 text-white"
+                                : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                            }`}
+                          >
+                            {subItem.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    to={item.path}
+                    className={`flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${
+                      location.pathname === item.path
+                        ? "bg-blue-600 text-white shadow-lg"
+                        : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                    }`}
                   >
-                    Student Details
-                  </NavLink>
+                    <span className="mr-3">{item.icon}</span>
+                    <span className="font-medium">{item.label}</span>
+                  </Link>
                 )}
               </div>
-            )}
-          </div>
+            ))}
+          </nav>
 
-          <div>
-            <button
-              onClick={() => handleParentClick("batches")}
-              className={`flex cursor-pointer justify-between items-center w-full p-2 rounded-md ${
-                location.pathname.startsWith("/batches") ||
-                location.pathname.startsWith("/batchDetails")
-                  ? "text-blue-600"
-                  : "text-black"
-              } hover:bg-gray-200`}
-            >
-              <div className="flex items-center space-x-2">
-                <MdOutlineSchool size={20} />
-                {isOpen && <span>Batches</span>}
+          {/* User Profile */}
+          <div className="p-4 border-t border-gray-700">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center">
+                <span className="text-white font-bold">A</span>
               </div>
-              {isOpen && (batchesOpen ? <FaAngleDown /> : <FaAngleRight />)}
-            </button>
-
-            {batchesOpen && isOpen && (
-              <div className="ml-6 space-y-1">
-                <NavLink
-                  to="/batches/all"
-                  className={`block p-2 rounded-md hover:bg-gray-200 ${
-                    location.pathname.startsWith("/batches/all")
-                      ? "text-blue-600"
-                      : "text-black"
-                  }`}
-                >
-                  All Batches
-                </NavLink>
-                <NavLink
-                  to="/batches/add"
-                  className={`block p-2 rounded-md hover:bg-gray-200 ${
-                    location.pathname.startsWith("/batches/add")
-                      ? "text-blue-600"
-                      : "text-black"
-                  }`}
-                >
-                  Add Batch
-                </NavLink>
-                {batchesOpen &&
-                  location.pathname.startsWith("/batchDetails/") && (
-                    <NavLink
-                      to={location.pathname}
-                      className="block p-2 rounded-md text-blue-600 bg-blue-100"
-                    >
-                      Batch Details
-                    </NavLink>
-                  )}
+              <div>
+                <p className="text-sm font-medium text-white">Admin User</p>
+                <p className="text-xs text-gray-400">admin@example.com</p>
               </div>
-            )}
+            </div>
           </div>
-        </nav>
+        </div>
       </div>
-    </div>
+
+      {/* Overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+    </>
   );
 };
 
