@@ -1,14 +1,14 @@
 import axios from "axios";
 
 // Create an Axios instance
-const API = axios.create({
-  baseURL: "http://localhost:3001/api",
-  withCredentials: true,
-});
 // const API = axios.create({
-//   baseURL: "https://ivanios-portal-api.vercel.app/api",
+//   baseURL: "http://localhost:3001/api",
 //   withCredentials: true,
 // });
+const API = axios.create({
+  baseURL: "https://ivanios-portal-api.vercel.app/api",
+  withCredentials: true,
+});
 
 // Admin Login
 async function login(data) {
@@ -197,6 +197,16 @@ export const addCourse = async (data) => {
   }
 };
 
+async function addStudent(data) {
+  try {
+    const response = await API.post("/addStudent", data);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error.response ? error.response.data : { error: "Network Error" };
+  }
+}
+
 export default {
   login,
   addStudentToBatch,
@@ -215,5 +225,6 @@ export default {
   deleteCourse,
   updateCourse,
   getAllCourses,
-  addCourse
+  addCourse,
+  addStudent
 };

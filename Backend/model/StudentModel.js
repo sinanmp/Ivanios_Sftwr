@@ -6,9 +6,9 @@ const studentSchema = new mongoose.Schema({
   enrollmentNo: { type: String, required: true, unique: true },
   admissionNo: { type: String, required: true, unique: true },
   mobile: { type: String, required: true },
-  batch: { type: mongoose.Schema.Types.ObjectId, ref: 'Batch', required: true }, // Reference to Batch
-  totalFees: { type: Number, required: true }, // Total fees for the course
-  feesPaid: { type: Number, required: true }, // Amount paid by the student
+  batch: { type: mongoose.Schema.Types.ObjectId, ref: 'Batch', required: true },
+  totalFees: { type: Number, required: true }, 
+  feesPaid: { type: Number, required: true },
   profileImage: { 
     url:String ,
     publicId:String

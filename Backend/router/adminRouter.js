@@ -17,6 +17,7 @@ router.get("/getCourses", Controller.getCourses);
 router.post("/addCourse", Controller.addCourse);
 router.delete("/deleteCourse/:id", Controller.deleteCourse);
 router.put("/updateCourse/:id", Controller.updateCourse);
+router.put("/updateStudent", Controller.updateStudent);
 router.get("/getCourseDetails", Controller.getCourseDetails);
-
+router.post("/addStudent", Controller.addStudent);
 export default router;   

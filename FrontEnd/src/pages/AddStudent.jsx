@@ -9,7 +9,7 @@ import api from "../services/api";
 import Spinner from "../components/Spinner";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { uploadFileToCloudinary } from "../services/Cloudinary";
+import { uploadFile } from "../services/FileUpload";
 
 const AddStudent = () => {
   const [loading, setLoading] = useState(false);
@@ -190,7 +190,6 @@ const AddStudent = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
-      // Show error toast for validation errors
       toast.error("Please fill in all required fields correctly");
       return;
     }
@@ -207,11 +206,11 @@ const AddStudent = () => {
         return;
       }
 
-      // Upload profile image to Cloudinary if exists
+      // Upload profile image if exists
       let profileImage = {};
       if (formData.profileImage) {
         try {
-          const imageData = await uploadFileToCloudinary(formData.profileImage);
+          const imageData = await uploadFile(formData.profileImage);
           profileImage = {
             url: imageData.url,
             publicId: imageData.public_id
@@ -222,13 +221,13 @@ const AddStudent = () => {
         }
       }
 
-      // Upload certificates to Cloudinary if they exist
+      // Upload certificates if they exist
       const certificateUrls = [];
       if (formData.certificates && formData.certificates.length > 0) {
         for (const cert of formData.certificates) {
           if (cert.file) {
             try {
-              const certData = await uploadFileToCloudinary(cert.file);
+              const certData = await uploadFile(cert.file);
               certificateUrls.push({
                 type: cert.type,
                 otherType: cert.otherType || '',
@@ -251,7 +250,7 @@ const AddStudent = () => {
         certificates: certificateUrls
       };
 
-      const response = await api.addStudentToBatch(studentData);
+      const response = await api.addStudent(studentData);
       if (response && !response.error) {
         toast.success("Student added successfully");
         navigate("/students/all");
@@ -260,22 +259,7 @@ const AddStudent = () => {
       }
     } catch (error) {
       console.error("Error adding student:", error);
-      
-      // Handle specific error cases
-      if (error.response?.data?.message?.includes("duplicate key")) {
-        if (error.response.data.message.includes("email")) {
-          setErrors(prev => ({ ...prev, email: "Email already exists" }));
-          toast.error("This email is already registered");
-        } else if (error.response.data.message.includes("enrollmentNo")) {
-          setErrors(prev => ({ ...prev, enrollmentNo: "Enrollment number already exists" }));
-          toast.error("This enrollment number is already registered");
-        } else if (error.response.data.message.includes("admissionNo")) {
-          setErrors(prev => ({ ...prev, admissionNo: "Admission number already exists" }));
-          toast.error("This admission number is already registered");
-        }
-      } else {
-        toast.error(error.response?.data?.message || "Failed to add student");
-      }
+      toast.error(error.response?.data?.message || "Failed to add student");
     } finally {
       setLoading(false);
     }
