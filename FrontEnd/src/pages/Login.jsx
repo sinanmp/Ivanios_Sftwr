@@ -5,6 +5,7 @@ import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import { Card, CardContent } from "../components/ui/Card";
 import LoginLeftSide from "../assets/login-left.png";
+import Logo from "../assets/logo.png.png";
 import api from "../services/api";
 import { toast } from "react-toastify";
 import Spinner from "../components/Spinner";
@@ -84,27 +85,41 @@ export default function LoginPage() {
   return (
     <>
       {loading && <Spinner />}
-      <div className="flex h-screen justify-center items-center">
-        <div className="w-1/2 flex">
+      <div className="flex min-h-screen bg-gray-50">
+        {/* Logo */}
+        <div className="hidden lg:block absolute left-4 z-10">
+          <img src={Logo} alt="Ivanios Logo" className="h-36 w-auto" />
+        </div>
+
+        {/* Left side with image - hidden on mobile */}
+        <div className="hidden md:flex md:w-1/2 lg:w-2/3 items-center justify-center">
           <img
             src={LoginLeftSide}
             alt="Login Illustration"
-            className="max-w-sm -ml-10 md:ml-12 lg:max-w-2xl "
+            className="max-w-md lg:max-w-2xl w-full h-auto object-contain p-6"
           />
         </div>
-        <div className="w-1/3 lg:w-1/2 flex items-center justify-center">
-          <Card className="max-w-sm shadow-lg rounded-lg bg-white relative">
-            <CardContent>
-              <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">
+
+        {/* Right side with login form */}
+        <div className="w-full md:w-1/2 lg:w-1/3 flex items-center justify-center p-4 md:p-8">
+          <Card className="w-full max-w-md shadow-lg rounded-lg bg-white">
+            <CardContent className="p-6 md:p-8">
+              {/* Show logo on mobile only */}
+              <div className="flex justify-center md:hidden">
+                <img src={Logo} alt="Ivanios Logo" className="h-32 w-auto" />
+              </div>
+              
+              <h2 className="text-2xl md:text-3xl font-bold text-center mb-4 md:mb-6 text-gray-800">
                 Welcome to IVANIOS
               </h2>
-              <p className="text-sm text-center text-gray-500 mb-8">
-                "Behind every great institution is a visionary leader—welcome
-                back, Admin!"
+              <p className="text-sm text-center text-gray-500 mb-6 md:mb-8 px-4">
+                "Behind every great institution is a visionary leader—welcome back, Admin!"
               </p>
-              <div className="flex justify-between mb-6 relative gap-2.5">
+
+              {/* Role Selection Buttons */}
+              <div className="grid grid-cols-3 gap-2 mb-6">
                 <Button
-                  className={`w-full py-2 mx-1 rounded ${
+                  className={`py-2 px-3 rounded text-sm md:text-base ${
                     role === "Admin"
                       ? "bg-blue-600 text-white"
                       : "bg-gray-200 text-gray-600"
@@ -115,77 +130,77 @@ export default function LoginPage() {
                 </Button>
                 <div className="relative">
                   <Button
-                    className="w-full py-2 bg-gray-300 text-gray-500 rounded-md cursor-not-allowed relative"
+                    className="w-full py-2 px-3 bg-gray-300 text-gray-500 rounded-md cursor-not-allowed text-sm md:text-base"
                     disabled
                   >
                     Teacher
                   </Button>
-                  <div className="absolute top-0 left-0 w-full h-full flex items-start justify-start overflow-hidden cursor-not-allowed">
-                    <div className="w-full bg-red-500 text-white text-[8px] font-bold px-2 py-1 shadow-md transform -rotate-42 translate-x-[-35%] translate-y-[3px] text-center">
+                  <div className="absolute top-0 left-0 w-full h-full flex items-start justify-start overflow-hidden">
+                    <div className="w-full bg-red-500 text-white text-[8px] md:text-[10px] font-bold px-1 py-0.5 shadow-md transform -rotate-42 translate-x-[-35%] translate-y-[3px] text-center">
                       Next-Up
                     </div>
                   </div>
                 </div>
                 <div className="relative">
                   <Button
-                    className="w-full py-2 bg-gray-300 text-gray-500 rounded-md cursor-not-allowed relative"
+                    className="w-full py-2 px-3 bg-gray-300 text-gray-500 rounded-md cursor-not-allowed text-sm md:text-base"
                     disabled
                   >
                     Student
                   </Button>
-                  <div className="absolute top-0 left-0 w-full h-full flex items-start justify-start overflow-hidden cursor-not-allowed">
-                    <div className="w-full bg-red-500 text-white text-[8px] font-bold px-2 py-1 shadow-md transform -rotate-42 translate-x-[-35%] text-center">
+                  <div className="absolute top-0 left-0 w-full h-full flex items-start justify-start overflow-hidden">
+                    <div className="w-full bg-red-500 text-white text-[8px] md:text-[10px] font-bold px-1 py-0.5 shadow-md transform -rotate-42 translate-x-[-35%] text-center">
                       Next-Up
                     </div>
                   </div>
                 </div>
               </div>
-              <form onSubmit={onSubmit}>
-                <div className="space-y-4">
-                  <div>
-                    <Input
-                      className={`border ${
-                        userNameErr ? "border-red-700" : "border-gray-300"
-                      } p-3 rounded w-full`}
-                      placeholder="Username"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      onBlur={() =>
-                        setIsTouched((prev) => ({ ...prev, username: true }))
-                      }
-                    />
-                    {userNameErr && (
-                      <p className="text-red-700 text-sm">
-                        Please enter username
-                      </p>
-                    )}
-                  </div>
-                  <div>
-                    <Input
-                      className={`border ${
-                        passErr ? "border-red-700" : "border-gray-300"
-                      } p-3 rounded w-full`}
-                      type="password"
-                      placeholder="Password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      onBlur={() =>
-                        setIsTouched((prev) => ({ ...prev, password: true }))
-                      }
-                    />
-                    {passErr && (
-                      <p className="text-red-700 text-sm">
-                        Please enter Password
-                      </p>
-                    )}
-                  </div>
-                  <button
-                    type="submit"
-                    className="w-full bg-blue-600 text-white py-3 rounded-lg text-lg"
-                  >
-                    Login
-                  </button>
+
+              {/* Login Form */}
+              <form onSubmit={onSubmit} className="space-y-4">
+                <div>
+                  <Input
+                    className={`border ${
+                      userNameErr ? "border-red-700" : "border-gray-300"
+                    } p-3 rounded w-full text-base`}
+                    placeholder="Username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    onBlur={() =>
+                      setIsTouched((prev) => ({ ...prev, username: true }))
+                    }
+                  />
+                  {userNameErr && (
+                    <p className="text-red-700 text-sm mt-1">
+                      Please enter username
+                    </p>
+                  )}
                 </div>
+                <div>
+                  <Input
+                    className={`border ${
+                      passErr ? "border-red-700" : "border-gray-300"
+                    } p-3 rounded w-full text-base`}
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onBlur={() =>
+                      setIsTouched((prev) => ({ ...prev, password: true }))
+                    }
+                  />
+                  {passErr && (
+                    <p className="text-red-700 text-sm mt-1">
+                      Please enter Password
+                    </p>
+                  )}
+                </div>
+                <button
+                  type="submit"
+                  className="w-full bg-blue-600 text-white py-3 rounded-lg text-base md:text-lg font-medium hover:bg-blue-700 transition-colors duration-200"
+                >
+                  Login
+                </button>
               </form>
             </CardContent>
           </Card>
