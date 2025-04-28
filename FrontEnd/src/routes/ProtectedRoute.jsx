@@ -6,7 +6,11 @@ const ProtectedRoute = () => {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <Spinner/>; // Show loading screen until user data is fetched
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Spinner />
+      </div>
+    );
   }
 
   return user ? <Outlet /> : <Navigate to="/" replace />;

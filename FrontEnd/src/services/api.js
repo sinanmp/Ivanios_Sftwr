@@ -18,9 +18,9 @@ async function login(data) {
 }
 
 // Add Student to Batch
-async function addStudentToBatch(data,certificates,photo) {
+async function addStudentToBatch(data) {
   try {
-    const response = await API.post("/addStudentToBatch", {data ,certificates ,photo});
+    const response = await API.post("/addStudentToBatch", { data });
     return response.data;
   } catch (error) {
     console.error(error);
@@ -95,6 +95,103 @@ async function getBatchDetails(id){
 }
 
 
+async function fetchCourses(id){
+  try{
+    const response = await API.get(`/getCourses`);
+    console.log("api js", response)
+    return response.data;
+  }
+  catch(error){
+    console.log(error)
+    return error.response ? error.response.data:{error : "Network Error"}
+  }
+}
+
+async function deleteBatch(id) {
+  try {
+    const response = await API.delete(`/deleteBatch?id=${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error.response ? error.response.data : { error: "Network Error" };
+  }
+}
+
+async function deleteStudent(id) {
+  try {
+    const response = await API.delete(`/deleteStudent?id=${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error.response ? error.response.data : { error: "Network Error" };
+  }
+}
+
+async function updateStudent(id, data) {
+  try {
+    const response = await API.put(`/updateStudent?id=${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error.response ? error.response.data : { error: "Network Error" };
+  }
+}
+
+const updateBatch = async (id, data) => {
+  try {
+    const response = await API.put(`/batches/${id}`, data);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { error: true, message: "Failed to update batch" };
+  }
+};
+
+export const getCourseDetails = async (id) => {
+  try {
+    const response = await API.get(`/getCourseDetails?id=${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching course details:", error);
+    return error.response?.data || { error: true, message: "Failed to fetch course details" };
+  }
+};
+
+export const deleteCourse = async (id) => {
+  try {
+    const response = await API.delete(`/deleteCourse/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateCourse = async (id, data) => {
+  try {
+    const response = await API.put(`/updateCourse/${id}`, data);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getAllCourses = async () => {
+  try {
+    const response = await API.get("/getCourses");
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const addCourse = async (data) => {
+  try {
+    const response = await API.post("/addCourse", data);
+    return response.data;
+  } catch (error) {
+    console.error("Error adding course:", error);
+    return error.response?.data || { error: true, message: "Failed to add course" };
+  }
+};
 
 export default {
   login,
@@ -105,4 +202,14 @@ export default {
   fetchStudents,
   getStudentDetails,
   getBatchDetails,
+  fetchCourses,
+  deleteBatch,
+  deleteStudent,
+  updateStudent,
+  updateBatch,
+  getCourseDetails,
+  deleteCourse,
+  updateCourse,
+  getAllCourses,
+  addCourse
 };

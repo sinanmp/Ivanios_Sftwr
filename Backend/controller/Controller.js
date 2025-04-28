@@ -1,7 +1,8 @@
 import BatchModel from "../model/BatchModel.js";
 import Batch from "../model/BatchModel.js";
+import Course from "../model/Course.model.js";
 import Student from "../model/StudentModel.js";
-import 'dotenv/config'
+import 'dotenv/config';
 
 class Controller {
 
@@ -38,43 +39,57 @@ class Controller {
 
   static async createBatch(req, res) {
     try {
-      console.log(req.body, 'hdfjkasf')
-      const { batchName, courses, startDate, endDate, instructor } = req.body;
+      const { batchName, courses, startDate, endDate, description } = req.body;
 
-      // Create a new batch
-      const newBatch = new Batch({
+      // Validate that all courses exist
+      const existingCourses = await Course.find({ _id: { $in: courses } });
+      if (existingCourses.length !== courses.length) {
+        return res.status(400).json({
+          error: true,
+          message: "One or more courses not found"
+        });
+      }
+
+      const newBatch = new BatchModel({
         batchName,
-        courses,
+        courses, // Now storing only course IDs
         startDate,
         endDate,
-        instructor,
+        description
       });
 
-      // Save to the database
       await newBatch.save();
 
       res.status(201).json({
         error: false,
         message: "Batch created successfully",
-        batch: newBatch,
+        batch: newBatch
       });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: "Error creating batch", error: true });
+      res.status(500).json({
+        error: true,
+        message: "Error creating batch"
+      });
     }
   }
 
   // Get all batches
   static async getAllBatches(req, res) {
     try {
-      const batches = await Batch.find();
+      const batches = await BatchModel.find()
+        .populate('courses', 'name duration fees description'); // Populate course details
+
       res.status(200).json({
         error: false,
         batches: batches
       });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: "Error retrieving batches", error: true });
+      res.status(500).json({ 
+        error: true,
+        message: "Error retrieving batches" 
+      });
     }
   }
 
@@ -98,16 +113,15 @@ class Controller {
       console.error(error);
       res.status(500).json({ message: "Error retrieving students", error: true });
     }
-  }
+  } 
 
   // Add a student to a batch
   static async addStudentToBatch(req, res) {
     try {
-      const { data, certificates, photo } = req.body
-      const { email, phone, batch } = data
-      console.log(req.body)
+      const { data } = req.body;
+      const { email, phone, batch, totalFees, feesPaid, profileImage, certificates } = data;
 
-      const sbatch = await BatchModel.findOne({ _id: batch })
+      const sbatch = await BatchModel.findOne({ _id: batch });
 
       if (!sbatch) {
         return res.status(404).json({ error: true, message: "Batch not found" });
@@ -115,14 +129,16 @@ class Controller {
 
       // Create the new student and associate it with the batch
       const newStudent = new Student({
-        name: data.firstName + ' ' + data.lastName,
+        name: data.name,
         email: data.email,
         mobile: data.mobile,
-        rollNo: data.rollNo,
-        enrollmentNo: data.enrollmentNo,  // Added enrollment number
-        profileImage: photo,               // Added image
-        certificates: certificates,   // Added certificate
+        enrollmentNo: data.enrollmentNo,
+        admissionNo: data.admissionNo,
+        profileImage: profileImage, // Now storing Cloudinary URL
+        certificates: certificates, // Now storing array of certificate objects with URLs
         batch: sbatch._id,
+        totalFees: totalFees,
+        feesPaid: feesPaid
       });
 
       // Save the student to the database
@@ -185,18 +201,26 @@ class Controller {
         message: "internal server error"
       })
     }
-  } static async getBatchDetails(req, res) {
+  }
+
+  static async getBatchDetails(req, res) {
     try {
-      const batchId = req.query.id; // or req.params.id if using route parameters
-      const batch = await Batch.findOne({ _id: batchId }).populate("students");
+      const id = req.query.id;
+      const batch = await BatchModel.findById(id)
+        .populate('courses', 'name duration fees description') // Populate course details
+        .populate('students', 'name email enrollmentNo admissionNo');
 
       if (!batch) {
-        return res.status(404).json({ error: false, batch: null });
+        return res.status(404).json({
+          error: true,
+          message: "Batch not found"
+        });
       }
 
       res.status(200).json({
         error: false,
-        batch // Return as an object instead of an array
+        message: "Batch fetched successfully",
+        data: batch
       });
     } catch (error) {
       console.error(error);
@@ -208,6 +232,181 @@ class Controller {
   }
 
 
+
+  static async getCourses(req,res){
+    try {
+      const result = await Course.find()
+      console.log(result ,"this is result")
+      res.status(200).json({
+        error:false,
+        message:"courses fetched successfully",
+        data:result
+      })
+    } catch (error) {
+      console.log(error)
+      res.status(500).json({
+        error:true ,
+        message:"internel server error"
+      })
+    }
+  }
+
+  static async addCourse(req, res) {
+    try {
+      const { name, duration, fees, description } = req.body;
+
+      // Create a new course
+      const newCourse = new Course({
+        name,
+        duration,
+        fees,
+        description
+      });
+
+      // Save to the database
+      await newCourse.save();
+
+      res.status(201).json({
+        error: false,
+        message: "Course added successfully",
+        course: newCourse
+      });
+    } catch (error) {
+      console.error(error);
+      if (error.code === 11000) {
+        res.status(400).json({
+          error: true,
+          message: "Course with this name already exists"
+        });
+      } else {
+        res.status(500).json({
+          error: true,
+          message: "Error adding course"
+        });
+      }
+    }
+  }
+
+  static async deleteCourse(req, res) {
+    try {
+      const { id } = req.params;
+      const course = await Course.findByIdAndDelete(id);
+      if (!course) {
+        return res.status(404).json({
+          error: true,
+          message: "Course not found"
+        });
+      }
+      res.status(200).json({
+        error: false,
+        message: "Course deleted successfully"
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        error: true,
+        message: "Error deleting course"
+      });
+    }
+  }
+
+  static async updateCourse(req, res) {
+    try {
+      const { id } = req.params;
+      const { name, duration, fees, description } = req.body;
+      const course = await Course.findByIdAndUpdate(
+        id,
+        { name, duration, fees, description },
+        { new: true }
+      );
+      if (!course) {
+        return res.status(404).json({
+          error: true,
+          message: "Course not found"
+        });
+      }
+      res.status(200).json({
+        error: false,
+        message: "Course updated successfully",
+        course
+      });
+    } catch (error) {
+      console.error(error);
+      if (error.code === 11000) {
+        res.status(400).json({
+          error: true,
+          message: "Course with this name already exists"
+        });
+      } else {
+        res.status(500).json({
+          error: true,
+          message: "Error updating course"
+        });
+      }
+    }
+  }
+
+  static async getCourseDetails(req, res) {
+    try {
+      const id = req.query.id;
+      const course = await Course.findOne({ _id: id });
+      
+      if (!course) {
+        return res.status(404).json({
+          error: true,
+          message: "Course not found"
+        });
+      }
+
+      res.status(200).json({
+        error: false,
+        message: "Course fetched successfully",
+        data: course
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        error: true,
+        message: "Internal server error"
+      });
+    }
+  }
+
+  // Delete a student
+  static async deleteStudent(req, res) {
+    try {
+      const { id } = req.query;
+      
+      // Find and delete the student
+      const student = await Student.findByIdAndDelete(id);
+      
+      if (!student) {
+        return res.status(404).json({
+          error: true,
+          message: "Student not found"
+        });
+      }
+
+      // Remove student reference from the batch
+      if (student.batch) {
+        await BatchModel.findByIdAndUpdate(
+          student.batch,
+          { $pull: { students: id } }
+        );
+      }
+
+      res.status(200).json({
+        error: false,
+        message: "Student deleted successfully"
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        error: true,
+        message: "Error deleting student"
+      });
+    }
+  }
 }
 
 export default Controller;

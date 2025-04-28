@@ -6,26 +6,31 @@ const AuthContext = createContext();
 // Provider component
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // Added loading state
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (storedUser) {
-      setUser(storedUser);
+    try {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+    } catch (error) {
+      console.error("Error parsing user data:", error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false); // Set loading to false after fetching data
   }, []);
 
   // Login function
   const login = (userData) => {
     setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData)); // Persist user data
+    localStorage.setItem("user", JSON.stringify(userData));
   };
 
   // Logout function
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("user"); // Clear storage
+    localStorage.removeItem("user");
   };
 
   return (

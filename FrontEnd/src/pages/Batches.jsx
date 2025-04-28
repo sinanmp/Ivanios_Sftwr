@@ -1,121 +1,156 @@
 // pages/BatchesPage.js
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FaHome,
   FaChevronRight,
-  FaBell,
-  FaExpand,
   FaPlus,
+  FaEye,
+  FaCalendarAlt,
+  FaUserTie,
+  FaBook,
+  FaEdit,
   FaTrash,
+  FaGraduationCap,
 } from "react-icons/fa";
 import Sidebar from "../components/Sidebar";
 import api from "../services/api";
 import { toast } from "react-toastify";
 import Spinner from "../components/Spinner";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+import { Card, CardHeader, CardContent } from "../components/ui/Card";
+import Button from "../components/ui/Button";
+import TopNav from "../components/TopNav";
 
 const BatchesPage = () => {
   const [batches, setBatches] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchBatches();
   }, []);
 
   const fetchBatches = async () => {
-    setLoading(true);
     try {
+      setLoading(true);
       const response = await api.getAllBatches();
-      console.log(response); // Check the structure of the response data
-      if (Array.isArray(response.batches)) {
-        setBatches(response.batches);
+      console.log('Batches response:', response); // Debug log
+      if (response && !response.error) {
+        setBatches(response.batches || []);
       } else {
-        setBatches([]); // Set to an empty array if the response is not an array
+        throw new Error(response.message || "Failed to fetch batches");
       }
     } catch (error) {
       console.error("Error fetching batches:", error);
-      toast.error("Failed to fetch batches", { position: "top-center" });
-      setBatches([]); // Set to an empty array in case of an error
+      toast.error(error.message || "Failed to fetch batches");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex fixed top-0 left-0 w-full h-screen bg-gray-100">
+    <div className="flex flex-col md:flex-row fixed top-0 left-0 w-full h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Sidebar />
-      <div className="flex-1 flex flex-col">
-        <div className="flex justify-end items-center bg-white px-6 py-4 shadow-md w-full">
-          <div className="flex items-center gap-4">
-            <FaExpand className="text-xl cursor-pointer text-gray-600" />
-            <FaBell className="text-xl cursor-pointer text-gray-600" />
-          </div>
-        </div>
-        <div className="flex-1 overflow-y-auto p-6">
-          <div className="flex items-center justify-between text-gray-600 space-x-2 text-lg font-medium">
-            <div className="flex justify-center items-center">
-              <FaHome className="text-blue-500" />
-              <FaChevronRight />
-              <span>Batches</span>
+      <div className="flex-1 flex flex-col ml-0 md:ml-64">
+        <TopNav />
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 pt-16 md:pt-24">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800">Batches</h1>
+              <p className="text-gray-600 mt-2">Manage and view all batches</p>
             </div>
-            <NavLink to="/batches/add">
-              <button
-                className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition"
-                onClick={() => navigate("/batches/add")}
-              >
-                Add Batch
-              </button>
-            </NavLink>
+            <Button
+              variant="primary"
+              onClick={() => navigate("/batches/add")}
+              className="flex items-center gap-2"
+            >
+              <FaPlus />
+              Add Batch
+            </Button>
           </div>
-          <div className="mt-6 bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">Batch List</h2>
-            <table className="w-full border-collapse border border-gray-300">
-              <thead>
-                <tr className="bg-gray-200">
-                  <th className="border p-3">Batch Name</th>
-                  <th className="border p-3">Course</th>
-                  <th className="border p-3">Start Date</th>
-                  <th className="border p-3">End Date</th>
-                  <th className="border p-3">Instructor</th>
-                  <th className="border p-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {batches.map((batch) => (
-                  <tr key={batch?._id} className="text-center">
-                    <td className="border p-3">{batch?.batchName}</td>
-                    <td className="border p-3">{batch?.course}</td>
-                    <td className="border p-3">
-                      {batch?.startDate
-                        ? format(new Date(batch.startDate), "dd-MM-yyyy")
-                        : ""}
-                    </td>
-                    <td className="border p-3">
-                      {batch?.endDate
-                        ? format(new Date(batch.endDate), "dd-MM-yyyy")
-                        : ""}
-                    </td>
-                    <td className="border p-3">{batch?.instructor}</td>
-                    <td className="border p-3">
-                      <button
-                        className="text-blue-500 cursor-pointer hover:text-red-700"
-                        onClick={() => navigate(`/batchDetails/${batch._id}`)}
-                      >
-                        View
-                      </button>
-                    </td>
+
+          {/* Batches Table */}
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+            <h3 className="text-xl font-semibold text-gray-800 mb-6">All Batches</h3>
+            <div className="overflow-x-auto rounded-lg border border-gray-200">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Batch Name
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Start Date
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      End Date
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Students
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {batches.length > 0 ? (
+                    batches.map((batch) => (
+                      <tr key={batch._id} className="hover:bg-gray-50 transition-colors duration-150">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{batch.batchName}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-500">
+                            {format(new Date(batch.startDate), "dd MMMM yyyy")}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-500">
+                            {format(new Date(batch.endDate), "dd MMMM yyyy")}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-500">{batch.students?.length || 0} students</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                          <div className="flex justify-center space-x-3">
+                            <button
+                              onClick={() => navigate(`/batchDetails/${batch._id}`)}
+                              className="text-indigo-600 hover:text-indigo-900 transition-colors duration-150"
+                              title="View Details"
+                            >
+                              <FaEye className="w-5 h-5" />
+                            </button>
+                            <button
+                              onClick={() => navigate(`/edit-batch/${batch._id}`)}
+                              className="text-green-600 hover:text-green-900 transition-colors duration-150"
+                              title="Edit Batch"
+                            >
+                              <FaEdit className="w-5 h-5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="5" className="px-6 py-4 text-center text-sm text-gray-500">
+                        No batches available
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        </main>
       </div>
-      {loading && <Spinner />}
     </div>
   );
 };
 
 export default BatchesPage;
+

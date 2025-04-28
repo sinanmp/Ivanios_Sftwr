@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaGoogle, FaFacebook, FaTwitter, FaLinkedin } from "react-icons/fa";
-import { Button } from "../components/ui/Button";
-import { Input } from "../components/ui/Input";
+import Button from "../components/ui/Button";
+import Input from "../components/ui/Input";
 import { Card, CardContent } from "../components/ui/Card";
 import LoginLeftSide from "../assets/login-left.png";
 import api from "../services/api";
@@ -18,8 +18,16 @@ export default function LoginPage() {
   const [passErr, setPassErr] = useState(false);
   const hasMounted = useRef(false);
   const [loading, setLoading] = useState(false);
-  const { login ,user } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    console.log("user in login page", user);
+    if (user) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [user, navigate]);
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -58,14 +66,6 @@ export default function LoginPage() {
     username: false,
     password: false,
   });
-
-
-  useEffect(()=>{
-    console.log("this is inside useEffect")
-    if(user){
-      navigate("/students/all")
-    }
-  },[])
 
   useEffect(() => {
     if (!hasMounted.current) {
