@@ -11,8 +11,12 @@ const app = express();
 
 // Enable CORS with specific settings
 app.use(cors({
-  origin: 'http://localhost:5173',  // Allow frontend origin
-  credentials: true, // Allow cookies and authentication headers
+  origin: [
+    'http://localhost:5173',
+    'http://192.168.137.1:5173',
+    'https://ivaniosportal.vercel.app'
+  ], // Allow both localhost and LAN IP
+  credentials: true
 }));
 
 // Connect to MongoDB
@@ -22,6 +26,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false })); 
 
 // Routes
+app.get('/', (req, res) => {
+  res.json({ message: 'Hello from backend' });
+});
+
 app.use('/api', adminRouter);  
 
 // Start the server
