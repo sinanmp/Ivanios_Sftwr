@@ -11,6 +11,7 @@ import {
   FaChalkboardTeacher,
   FaBook,
 } from "react-icons/fa";
+import Logo from "../assets/logo_only.png";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -90,15 +91,17 @@ const Sidebar = () => {
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 left-0 h-full w-64 bg-gradient-to-b from-gray-900 to-gray-800 text-white transform transition-transform duration-300 ease-in-out z-40 ${
+        className={`fixed top-0 left-0 h-full w-[250px] bg-gradient-to-b from-gray-900 to-gray-800 text-white transform transition-transform duration-300 ease-in-out z-40 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0`}
-        style={{ '--sidebar-width': '16rem' }}
+        } md:translate-x-0 overflow-y-auto`}
       >
         <div className="flex flex-col h-full">
-          {/* Logo */}
+          {/* Logo and Title */}
           <div className="p-6">
-            <h1 className="text-2xl font-bold text-white">Student Portal</h1>
+            <div className="flex justify-center">
+              <img src={Logo} alt="Ivanios Logo" className="h-20 w-auto" />
+            </div>
+            <h1 className="text-2xl font-bold text-white text-center">Student Portal</h1>
           </div>
 
           {/* Navigation */}

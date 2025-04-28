@@ -266,34 +266,23 @@ const AddStudent = () => {
   };
 
   return (
-    <div className="flex fixed top-0 left-0 w-full h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <Sidebar />
-      <div className="flex-1 flex flex-col md:ml-64" style={{ marginLeft: 'var(--sidebar-width, 16rem)' }}>
+    <div className="flex h-screen bg-gray-100">
+      <Sidebar />
+      <div className="flex-1 flex flex-col">
         <TopNav />
-        <main className="flex-1 overflow-y-auto p-6 pt-24">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-800">Add New Student</h1>
-            <p className="text-gray-600 mt-2">Fill in the details to add a new student</p>
-          </div>
+        <div className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 md:ml-64">
+          <div className="container mx-auto px-4 py-8">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+              <h1 className="text-2xl font-semibold text-gray-800">Add New Student</h1>
+              <Button
+                variant="secondary"
+                onClick={() => navigate("/students/all")}
+                className="w-full md:w-auto"
+              >
+                Back to Students
+              </Button>
+            </div>
 
-          {batches.length === 0 ? (
-            <Card variant="elevated" hoverable>
-              <CardContent className="text-center py-8">
-                <FaGraduationCap className="text-gray-400 text-5xl mx-auto mb-4" />
-                <h2 className="text-xl font-semibold text-gray-800 mb-2">No Batches Available</h2>
-                <p className="text-gray-600 mb-4">You need to create at least one batch before adding students.</p>
-                <Button
-                  variant="primary"
-                  onClick={() => navigate("/batches/add")}
-                  className="inline-flex items-center gap-2"
-                >
-                  <FaGraduationCap />
-                  Create Batch
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
             <Card variant="elevated" hoverable>
               <CardHeader
                 title="Student Information"
@@ -634,8 +623,8 @@ const AddStudent = () => {
               </form>
               </CardContent>
             </Card>
-          )}
-        </main>
+          </div>
+        </div>
       </div>
     </div>
   );

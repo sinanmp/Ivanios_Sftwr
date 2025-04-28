@@ -1,16 +1,14 @@
-import { useState } from "react";
-import "./App.css";
+import { SidebarProvider } from "./context/SidebarContext";
 import LayoutRoutes from "./routes/LayoutRoutes";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
-    <>
-      {/* <Login/> */}
-      <ToastContainer />
+    <SidebarProvider>
       <LayoutRoutes />
-    </>
+      <ToastContainer />
+    </SidebarProvider>
   );
 }
 

@@ -172,164 +172,166 @@ const AddCourse = () => {
   };
 
   return (
-    <div className="flex fixed top-0 left-0 w-full h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="flex h-screen bg-gray-100">
       <Sidebar />
-      <div className="flex-1 flex flex-col md:ml-64" style={{ marginLeft: 'var(--sidebar-width, 16rem)' }}>
+      <div className="flex-1 flex flex-col">
         <TopNav />
-        <main className="flex-1 overflow-y-auto p-6 pt-24">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                onClick={() => navigate("/courses")}
-                className="flex items-center gap-2 hover:bg-gray-100 transition-colors"
-              >
-                <FaArrowLeft />
-                Back to Courses
-              </Button>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-800">Add New Course</h1>
-                <p className="text-gray-600 mt-2">Fill in the required details to add a new course</p>
+        <div className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 md:ml-64 pt-16">
+          <div className="container mx-auto px-4 py-8">
+            {/* Header */}
+            <div className="mb-8">
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/courses")}
+                  className="flex items-center gap-2 hover:bg-gray-100 transition-colors"
+                >
+                  <FaArrowLeft />
+                  Back to Courses
+                </Button>
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-800">Add New Course</h1>
+                  <p className="text-gray-600 mt-2">Fill in the required details to add a new course</p>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Form */}
-          <Card variant="elevated" hoverable className="max-w-2xl mx-auto bg-white shadow-lg">
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-8">
-                <div className="space-y-6">
-                  {/* Course Name */}
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                      Course Name <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <FaBook className="text-gray-400" />
-                      </div>
-                      <Input
-                        type="text"
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        required
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                        placeholder="Enter course name"
-                      />
-                    </div>
-                    {errors.name && (
-                      <p className="mt-1 text-sm text-red-500">{errors.name}</p>
-                    )}
-                  </div>
-
-                  {/* Duration */}
-                  <div>
-                    <label htmlFor="duration" className="block text-sm font-medium text-gray-700 mb-2">
-                      Duration <span className="text-red-500">*</span>
-                    </label>
-                    <div className="flex gap-3">
-                      <div className="flex-1 relative">
+            {/* Form */}
+            <Card variant="elevated" hoverable className="max-w-2xl mx-auto bg-white shadow-lg">
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-8">
+                  <div className="space-y-6">
+                    {/* Course Name */}
+                    <div>
+                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                        Course Name <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <FaClock className="text-gray-400" />
+                          <FaBook className="text-gray-400" />
                         </div>
                         <Input
                           type="text"
-                          id="duration"
-                          name="duration"
-                          value={formData.duration}
+                          id="name"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          required
+                          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                          placeholder="Enter course name"
+                        />
+                      </div>
+                      {errors.name && (
+                        <p className="mt-1 text-sm text-red-500">{errors.name}</p>
+                      )}
+                    </div>
+
+                    {/* Duration */}
+                    <div>
+                      <label htmlFor="duration" className="block text-sm font-medium text-gray-700 mb-2">
+                        Duration <span className="text-red-500">*</span>
+                      </label>
+                      <div className="flex gap-3">
+                        <div className="flex-1 relative">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <FaClock className="text-gray-400" />
+                          </div>
+                          <Input
+                            type="text"
+                            id="duration"
+                            name="duration"
+                            value={formData.duration}
+                            onChange={handleDurationChange}
+                            required
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                            placeholder="Enter duration"
+                          />
+                        </div>
+                        <div className="w-32">
+                          <select
+                            name="durationUnit"
+                            value={formData.durationUnit}
+                            onChange={handleChange}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                          >
+                            <option value="months">Months</option>
+                            <option value="years">Years</option>
+                          </select>
+                        </div>
+                      </div>
+                      {formData.duration && (
+                        <p className="mt-2 text-sm text-gray-500">
+                          {formatDuration(formData.duration, formData.durationUnit)}
+                        </p>
+                      )}
+                      {errors.duration && (
+                        <p className="mt-1 text-sm text-red-500">{errors.duration}</p>
+                      )}
+                    </div>
+
+                    {/* Fees */}
+                    <div>
+                      <label htmlFor="fees" className="block text-sm font-medium text-gray-700 mb-2">
+                        Course Fees <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <FaMoneyBillWave className="text-gray-400" />
+                        </div>
+                        <Input
+                          type="text"
+                          id="fees"
+                          name="fees"
+                          value={formData.fees}
                           onChange={handleDurationChange}
                           required
                           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                          placeholder="Enter duration"
+                          placeholder="Enter course fees in INR"
                         />
                       </div>
-                      <div className="w-32">
-                        <select
-                          name="durationUnit"
-                          value={formData.durationUnit}
-                          onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                        >
-                          <option value="months">Months</option>
-                          <option value="years">Years</option>
-                        </select>
-                      </div>
+                      {formData.fees && (
+                        <p className="mt-2 text-sm text-gray-500">
+                          {formatFees(formData.fees)}
+                        </p>
+                      )}
+                      {errors.fees && (
+                        <p className="mt-1 text-sm text-red-500">{errors.fees}</p>
+                      )}
                     </div>
-                    {formData.duration && (
-                      <p className="mt-2 text-sm text-gray-500">
-                        {formatDuration(formData.duration, formData.durationUnit)}
-                      </p>
-                    )}
-                    {errors.duration && (
-                      <p className="mt-1 text-sm text-red-500">{errors.duration}</p>
-                    )}
-                  </div>
 
-                  {/* Fees */}
-                  <div>
-                    <label htmlFor="fees" className="block text-sm font-medium text-gray-700 mb-2">
-                      Course Fees <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <FaMoneyBillWave className="text-gray-400" />
-                      </div>
-                      <Input
-                        type="text"
-                        id="fees"
-                        name="fees"
-                        value={formData.fees}
-                        onChange={handleDurationChange}
-                        required
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                        placeholder="Enter course fees in INR"
+                    {/* Description */}
+                    <div>
+                      <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+                        Description
+                      </label>
+                      <textarea
+                        id="description"
+                        name="description"
+                        value={formData.description}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                        rows="4"
+                        placeholder="Enter course description (optional)"
                       />
                     </div>
-                    {formData.fees && (
-                      <p className="mt-2 text-sm text-gray-500">
-                        {formatFees(formData.fees)}
-                      </p>
-                    )}
-                    {errors.fees && (
-                      <p className="mt-1 text-sm text-red-500">{errors.fees}</p>
-                    )}
                   </div>
 
-                  {/* Description */}
-                  <div>
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                      Description
-                    </label>
-                    <textarea
-                      id="description"
-                      name="description"
-                      value={formData.description}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                      rows="4"
-                      placeholder="Enter course description (optional)"
-                    />
+                  <div className="flex justify-end pt-4">
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      className="flex items-center gap-2 px-6 py-2.5 text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm transition-colors"
+                      disabled={loading}
+                    >
+                      {loading ? <Spinner /> : <FaPlus />}
+                      Add Course
+                    </Button>
                   </div>
-                </div>
-
-                <div className="flex justify-end pt-4">
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    className="flex items-center gap-2 px-6 py-2.5 text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm transition-colors"
-                    disabled={loading}
-                  >
-                    {loading ? <Spinner /> : <FaPlus />}
-                    Add Course
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </main>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
