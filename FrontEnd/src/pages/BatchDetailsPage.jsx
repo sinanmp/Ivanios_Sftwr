@@ -46,7 +46,7 @@ const BatchDetailsPage = () => {
   if (loading) return <Spinner />;
   if (error) return <p className="text-red-500">{error}</p>;
   if (!batch) return <p>No batch details found.</p>;
-
+  if(!loading) console.log(batch.students)
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Sidebar />
