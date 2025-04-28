@@ -12,14 +12,11 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "https://your-backend-url.vercel.app/api/$1"
+      "dest": "https://ivanios-portal-api.vercel.app/api/$1"
     },
     {
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ],
-  "env": {
-    "VITE_API_URL": "https://your-backend-url.vercel.app/api"
-  }
+  ]
 } 
