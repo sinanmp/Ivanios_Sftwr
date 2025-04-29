@@ -5,8 +5,13 @@ import axios from "axios";
 //   baseURL: "http://localhost:3001/api",
 //   withCredentials: true,
 // });
+// const API = axios.create({
+//   baseURL: "https://ivanios-portal-api.vercel.app/api",
+//   withCredentials: true,
+// });
+
 const API = axios.create({
-  baseURL: "https://ivanios-portal-api.vercel.app/api",
+  baseURL: "https://api.ivaniosedutech.com/api",
   withCredentials: true,
 });
 

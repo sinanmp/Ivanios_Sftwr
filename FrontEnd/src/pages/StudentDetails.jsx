@@ -59,104 +59,105 @@ const StudentDetails = () => {
     if (!student) return <p>No student found.</p>;
 
     return (
-        <div className="flex fixed top-0 left-0 w-full h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="flex flex-col md:flex-row fixed top-0 left-0 w-full h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             <Sidebar />
-            <div className="flex-1 flex flex-col md:ml-64" style={{ marginLeft: 'var(--sidebar-width, 16rem)' }}>
+            <div className="flex-1 flex flex-col ml-0 md:ml-64">
                 <TopNav />
-                <main className="flex-1 overflow-y-auto p-6 pt-24">
+                <main className="flex-1 overflow-y-auto p-4 md:p-6 pt-16 md:pt-24">
                     {/* Breadcrumb */}
-                    <div className="flex items-center text-gray-600 space-x-2 text-lg font-medium mb-6">
-                        <FaHome className="text-blue-500" />
-                        <FaChevronRight className="text-gray-400" />
+                    <div className="flex items-center text-gray-600 space-x-2 text-sm md:text-base font-medium mb-4 md:mb-6 overflow-x-auto">
+                        <FaHome className="text-blue-500 flex-shrink-0" />
+                        <FaChevronRight className="text-gray-400 flex-shrink-0" />
                         <span 
                             onClick={() => navigate("/students/all")}
-                            className="cursor-pointer hover:text-blue-500 transition-colors duration-200"
+                            className="cursor-pointer hover:text-blue-500 transition-colors duration-200 whitespace-nowrap"
                         >
                             Students
                         </span>
-                        <FaChevronRight className="text-gray-400" />
-                        <span className="text-blue-500">{student.name}</span>
+                        <FaChevronRight className="text-gray-400 flex-shrink-0" />
+                        <span className="text-blue-500 truncate">{student.name}</span>
                     </div>
 
                     {/* Main Content */}
-                    <div className="max-w-6xl mx-auto">
-                        <Card variant="elevated" hoverable className="mb-6">
+                    <div className="w-full max-w-6xl mx-auto">
+                        <Card variant="elevated" hoverable className="mb-4 md:mb-6">
                             <CardHeader
                                 title="Student Profile"
                                 subtitle="View and manage student information"
                             />
                             <CardContent>
-                                <div className="flex flex-col md:flex-row items-start space-y-6 md:space-y-0 md:space-x-8">
+                                <div className="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8">
                                     {/* Profile Image */}
-                                    <div className="relative group">
+                                    <div className="relative group w-32 h-32 md:w-48 md:h-48 flex-shrink-0">
                                         <img
                                             src={student.profileImage?.url || "/default-profile.png"}
                                             alt="Profile"
                                             onClick={() => setSelectedImage(student.profileImage?.url)}
-                                            className="w-48 h-48 object-cover cursor-pointer rounded-xl border-4 border-blue-500 shadow-lg transition-transform duration-300 group-hover:scale-105"
+                                            className="w-full h-full object-cover cursor-pointer rounded-xl border-4 border-blue-500 shadow-lg transition-transform duration-300 group-hover:scale-105"
                                         />
-                                           
                                     </div>
 
                                     {/* Student Details */}
-                                    <div className="flex-1 space-y-6">
-                                        <div>
-                                            <h2 className="text-3xl font-bold text-gray-800">{student.name}</h2>
+                                    <div className="flex-1 w-full space-y-4 md:space-y-6">
+                                        <div className="text-center md:text-left">
+                                            <h2 className="text-2xl md:text-3xl font-bold text-gray-800">{student.name}</h2>
                                             <p className="text-gray-600 mt-1">Student ID: {student.enrollmentNo}</p>
                                         </div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <div className="flex items-center space-x-3">
-                                                <div className="p-2 bg-blue-100 rounded-lg">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+                                            <div className="flex items-center space-x-3 p-3 bg-white rounded-lg shadow-sm">
+                                                <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
                                                     <FaEnvelope className="text-blue-500 text-xl" />
                                                 </div>
-                                                <div>
+                                                <div className="min-w-0">
                                                     <p className="text-sm text-gray-500">Email</p>
-                                                    <p className="font-medium">{student.email}</p>
+                                                    <p className="font-medium truncate">{student.email}</p>
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-center space-x-3">
-                                                <div className="p-2 bg-blue-100 rounded-lg">
+                                            <div className="flex items-center space-x-3 p-3 bg-white rounded-lg shadow-sm">
+                                                <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
                                                     <FaPhone className="text-blue-500 text-xl" />
                                                 </div>
-                                                <div>
+                                                <div className="min-w-0">
                                                     <p className="text-sm text-gray-500">Mobile</p>
-                                                    <p className="font-medium">{student.mobile}</p>
+                                                    <p className="font-medium truncate">{student.mobile}</p>
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-center space-x-3">
-                                                <div className="p-2 bg-blue-100 rounded-lg">
+                                            <div className="flex items-center space-x-3 p-3 bg-white rounded-lg shadow-sm">
+                                                <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
                                                     <FaGraduationCap className="text-blue-500 text-xl" />
                                                 </div>
-                                                <div>
+                                                <div className="min-w-0">
                                                     <p className="text-sm text-gray-500">Batch</p>
-                                                    <p className="font-medium">{student.batch?.batchName || "N/A"}</p>
+                                                    <p className="font-medium truncate">{student.batch?.batchName || "N/A"}</p>
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-center space-x-3">
-                                                <div className="p-2 bg-blue-100 rounded-lg">
+                                            <div className="flex items-center space-x-3 p-3 bg-white rounded-lg shadow-sm">
+                                                <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
                                                     <FaIdCard className="text-blue-500 text-xl" />
                                                 </div>
-                                                <div>
+                                                <div className="min-w-0">
                                                     <p className="text-sm text-gray-500">Admission No</p>
-                                                    <p className="font-medium">{student.admissionNo}</p>
+                                                    <p className="font-medium truncate">{student.admissionNo}</p>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div className="flex space-x-4">
+                                        <div className="flex flex-col sm:flex-row gap-3 sm:space-x-4">
                                             <Button
                                                 variant="primary"
                                                 onClick={() => navigate(`/editStudent/${id}`)}
+                                                className="w-full sm:w-auto"
                                             >
                                                 Edit Profile
                                             </Button>
                                             <Button
                                                 variant="secondary"
                                                 onClick={() => navigate("/students/all")}
+                                                className="w-full sm:w-auto"
                                             >
                                                 Back to Students
                                             </Button>
@@ -174,22 +175,23 @@ const StudentDetails = () => {
                             />
                             <CardContent>
                                 {student.certificates.length > 0 ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         {student.certificates.map((cert, index) => (
                                             <div
                                                 key={index}
-                                                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+                                                className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200 space-y-3 sm:space-y-0"
                                             >
                                                 <div className="flex items-center space-x-3">
-                                                    <div className="p-2 bg-blue-100 rounded-lg">
+                                                    <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
                                                         <FaDownload className="text-blue-500" />
                                                     </div>
-                                                    <span className="font-medium">{cert.type}</span>
+                                                    <span className="font-medium truncate">{cert.type}</span>
                                                 </div>
                                                 <Button
                                                     variant="primary"
                                                     size="sm"
                                                     onClick={() => downloadCertificate(cert.url, cert.type)}
+                                                    className="w-full sm:w-auto"
                                                 >
                                                     Download
                                                 </Button>
@@ -198,10 +200,11 @@ const StudentDetails = () => {
                                     </div>
                                 ) : (
                                     <div className="text-center py-8">
-                                        <div className="inline-block p-4 bg-gray-100 rounded-full mb-4">
-                                            <FaDownload className="text-gray-400 text-2xl" />
+                                        <div className="flex justify-center mb-4">
+                                            <FaGraduationCap className="text-4xl text-gray-400" />
                                         </div>
-                                        <p className="text-gray-500">No certificates available</p>
+                                        <h3 className="text-lg font-medium text-gray-700 mb-2">No Certificates</h3>
+                                        <p className="text-gray-500">This student has no certificates uploaded yet.</p>
                                     </div>
                                 )}
                             </CardContent>
