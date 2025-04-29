@@ -59,18 +59,18 @@ const StudentDetails = () => {
     if (!student) return <p>No student found.</p>;
 
     return (
-        <div className="flex flex-col md:flex-row fixed top-0 left-0 w-full h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
             <Sidebar />
-            <div className="flex-1 flex flex-col ml-0 md:ml-64">
+            <div className="flex-1 flex flex-col min-h-screen ml-0 md:ml-64">
                 <TopNav />
                 <main className="flex-1 overflow-y-auto p-4 md:p-6 pt-16 md:pt-24">
                     {/* Breadcrumb */}
-                    <div className="flex items-center text-gray-600 space-x-2 text-sm md:text-base font-medium mb-4 md:mb-6 overflow-x-auto">
+                    <div className="flex items-center text-gray-600 space-x-2 text-sm md:text-base font-medium mb-4 md:mb-6 overflow-x-auto whitespace-nowrap">
                         <FaHome className="text-blue-500 flex-shrink-0" />
                         <FaChevronRight className="text-gray-400 flex-shrink-0" />
                         <span 
                             onClick={() => navigate("/students/all")}
-                            className="cursor-pointer hover:text-blue-500 transition-colors duration-200 whitespace-nowrap"
+                            className="cursor-pointer hover:text-blue-500 transition-colors duration-200"
                         >
                             Students
                         </span>
@@ -79,8 +79,8 @@ const StudentDetails = () => {
                     </div>
 
                     {/* Main Content */}
-                    <div className="w-full max-w-6xl mx-auto">
-                        <Card variant="elevated" hoverable className="mb-4 md:mb-6">
+                    <div className="w-full max-w-5xl mx-auto space-y-6">
+                        <Card className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
                             <CardHeader
                                 title="Student Profile"
                                 subtitle="View and manage student information"
@@ -104,7 +104,7 @@ const StudentDetails = () => {
                                             <p className="text-gray-600 mt-1">Student ID: {student.enrollmentNo}</p>
                                         </div>
 
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div className="flex items-center space-x-3 p-3 bg-white rounded-lg shadow-sm">
                                                 <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
                                                     <FaEnvelope className="text-blue-500 text-xl" />
@@ -146,7 +146,7 @@ const StudentDetails = () => {
                                             </div>
                                         </div>
 
-                                        <div className="flex flex-col sm:flex-row gap-3 sm:space-x-4">
+                                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                                             <Button
                                                 variant="primary"
                                                 onClick={() => navigate(`/editStudent/${id}`)}
@@ -168,7 +168,7 @@ const StudentDetails = () => {
                         </Card>
 
                         {/* Certificates Section */}
-                        <Card variant="elevated" hoverable>
+                        <Card className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
                             <CardHeader
                                 title="Certificates"
                                 subtitle="View and download student certificates"
@@ -179,7 +179,7 @@ const StudentDetails = () => {
                                         {student.certificates.map((cert, index) => (
                                             <div
                                                 key={index}
-                                                className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200 space-y-3 sm:space-y-0"
+                                                className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200 space-y-3 sm:space-y-0 sm:space-x-4"
                                             >
                                                 <div className="flex items-center space-x-3">
                                                     <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
@@ -215,10 +215,10 @@ const StudentDetails = () => {
 
             {/* Image Preview Modal */}
             {selectedImage && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50">
-                    <div className="relative">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-80">
+                    <div className="relative max-w-4xl w-full">
                         <button
-                            className="absolute -top-4 -right-4 cursor-pointer text-white bg-gray-700 rounded-full p-2 hover:bg-gray-600 transition-colors duration-200"
+                            className="absolute -top-4 -right-4 z-10 p-2 bg-gray-700 rounded-full text-white hover:bg-gray-600 transition-colors duration-200"
                             onClick={() => setSelectedImage(null)}
                         >
                             <FaTimes className="text-xl" />
@@ -226,7 +226,7 @@ const StudentDetails = () => {
                         <img
                             src={selectedImage}
                             alt="Preview"
-                            className="max-w-full max-h-[90vh] rounded-lg shadow-2xl"
+                            className="w-full h-auto rounded-lg shadow-2xl"
                         />
                     </div>
                 </div>

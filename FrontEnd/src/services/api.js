@@ -1,19 +1,19 @@
 import axios from "axios";
 
 // Create an Axios instance
-// const API = axios.create({
-//   baseURL: "http://localhost:3001/api",
-//   withCredentials: true,
-// });
+const API = axios.create({
+  baseURL: "http://localhost:3001/api",
+  withCredentials: true,
+});
 // const API = axios.create({
 //   baseURL: "https://ivanios-portal-api.vercel.app/api",
 //   withCredentials: true,
 // });
 
-const API = axios.create({
-  baseURL: "https://api.ivaniosedutech.com/api",
-  withCredentials: true,
-});
+// const API = axios.create({
+//   baseURL: "https://api.ivaniosedutech.com/api",
+//   withCredentials: true,
+// });
 
 // Admin Login
 async function login(data) {

@@ -64,81 +64,146 @@ const AllStudents = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
       <Sidebar />
-      <div className="flex-1 flex flex-col md:ml-[250px]">
+      <div className="flex-1 flex flex-col min-h-screen ml-0 md:ml-64">
         <TopNav />
-        <main className="flex-1 overflow-y-auto pt-16">
-          <div className="p-4 md:p-6 w-full md:max-w-[calc(100vw-250px)]">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 pt-16 md:pt-24">
+          <div className="max-w-[2000px] mx-auto">
+            {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-              <h1 className="text-2xl font-semibold text-gray-800">All Students</h1>
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">All Students</h1>
+                <p className="text-sm md:text-base text-gray-600">Manage and view all student records</p>
+              </div>
               <Button
                 variant="primary"
                 onClick={() => navigate("/students/add")}
-                className="w-full md:w-auto"
+                className="w-full md:w-auto flex items-center justify-center gap-2 py-2.5"
               >
-                <FaPlus className="mr-2" />
-                Add New Student
+                <FaPlus className="text-lg" />
+                <span>Add New Student</span>
               </Button>
             </div>
 
-            <Card variant="elevated" hoverable className="mb-6">
+            {/* Search Section */}
+            <Card className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 mb-6">
               <CardHeader
                 title="Search Students"
                 subtitle="Find students by name, roll number, or email"
               />
-              <CardContent>
+              <CardContent className="p-4 md:p-6">
                 <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
-                  <Input
-                    type="text"
-                    placeholder="Search students..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="flex-1"
-                  />
-                  <Button type="submit" variant="primary" className="w-full md:w-auto">
-                    <FaSearch className="mr-2" />
-                    Search
+                  <div className="flex-1 relative">
+                    <Input
+                      type="text"
+                      placeholder="Search students..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-10"
+                    />
+                    <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  </div>
+                  <Button 
+                    type="submit" 
+                    variant="primary" 
+                    className="w-full md:w-auto flex items-center justify-center gap-2 py-2.5"
+                  >
+                    <FaSearch className="text-lg" />
+                    <span>Search</span>
                   </Button>
                 </form>
               </CardContent>
             </Card>
 
-            <Card variant="elevated" hoverable>
+            {/* Students List */}
+            <Card className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
               <CardHeader
                 title="Student List"
                 subtitle={`Showing ${students.length} students`}
               />
-              <CardContent>
+              <CardContent className="p-0">
                 {loading ? (
                   <div className="flex justify-center items-center h-64">
                     <Spinner />
                   </div>
                 ) : (
-                  <div className="overflow-x-auto -mx-4 md:mx-0">
-                    <div className="inline-block min-w-full align-middle">
+                  <>
+                    {/* Mobile View */}
+                    <div className="md:hidden">
+                      {students.length === 0 ? (
+                        <EmptyState />
+                      ) : (
+                        <div className="divide-y divide-gray-200">
+                          {students.map((student) => (
+                            <div key={student._id} className="p-4 hover:bg-gray-50">
+                              <div className="flex items-center space-x-4">
+                                <img
+                                  src={student.profileImage?.url || "https://via.placeholder.com/40"}
+                                  alt=""
+                                  className="h-12 w-12 rounded-full object-cover"
+                                />
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-gray-900 truncate">{student.name}</p>
+                                  <p className="text-xs text-gray-500">{student.enrollmentNo}</p>
+                                  <p className="text-xs text-gray-500">{student.batch?.batchName || "No Batch"}</p>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <button
+                                    onClick={() => navigate(`/studentDetails/${student._id}`)}
+                                    className="p-2 text-indigo-600 hover:text-indigo-900"
+                                  >
+                                    <FaEye className="h-5 w-5" />
+                                  </button>
+                                  <button
+                                    onClick={() => navigate(`/editStudent/${student._id}`)}
+                                    className="p-2 text-yellow-600 hover:text-yellow-900"
+                                  >
+                                    <FaEdit className="h-5 w-5" />
+                                  </button>
+                                </div>
+                              </div>
+                              <div className="mt-2 flex justify-between items-center">
+                                <div className="text-sm text-red-500">
+                                  Pending: ₹{student.totalFees - student.feesPaid}
+                                </div>
+                                <button
+                                  onClick={() => handleDelete(student._id)}
+                                  className="text-red-600 hover:text-red-900 p-2"
+                                >
+                                  <FaTrash className="h-5 w-5" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Desktop View */}
+                    <div className="hidden md:block overflow-x-auto">
                       <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                           <tr>
-                            <th scope="col" className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               Name
                             </th>
-                            <th scope="col" className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               Enrollment No.
                             </th>
-                            <th scope="col" className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               Admission No.
                             </th>
-                            <th scope="col" className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               Pending Fees
                             </th>
-                            <th scope="col" className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               Mobile
                             </th>
-                            <th scope="col" className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               Batch
                             </th>
-                            <th scope="col" className="px-3 md:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                               Actions
                             </th>
                           </tr>
@@ -146,88 +211,65 @@ const AllStudents = () => {
                         <tbody className="bg-white divide-y divide-gray-200">
                           {students.length === 0 ? (
                             <tr>
-                              <td colSpan="7" className="px-3 md:px-6 py-4">
-                                <div className="text-center py-8">
-                                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-                                    <FaUserGraduate className="w-8 h-8 text-gray-400" />
-                                  </div>
-                                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Students Found</h3>
-                                  <p className="text-gray-500 mb-4">There are currently no students in the system.</p>
-                                  <Button
-                                    variant="primary"
-                                    onClick={() => navigate("/students/add")}
-                                    className="inline-flex items-center"
-                                  >
-                                    <FaPlus className="mr-2" />
-                                    Add New Student
-                                  </Button>
-                                </div>
+                              <td colSpan="7">
+                                <EmptyState />
                               </td>
                             </tr>
                           ) : (
                             students.map((student) => (
                               <tr key={student._id} className="hover:bg-gray-50">
-                                <td className="px-3 md:px-6 py-4 whitespace-nowrap">
+                                <td className="px-6 py-4 whitespace-nowrap">
                                   <div className="flex items-center">
-                                    <div className="flex-shrink-0 h-8 w-8 md:h-10 md:w-10">
-                                      <img
-                                        className="h-8 w-8 md:h-10 md:w-10 rounded-full"
-                                        src={student.profileImage?.url || "https://via.placeholder.com/40"}
-                                        alt=""
-                                      />
-                                    </div>
-                                    <div className="ml-3 md:ml-4">
-                                      <div className="text-sm font-medium text-gray-900">
-                                        {student.name}
-                                      </div>
-                                      <div className="text-xs text-gray-500 md:hidden">
-                                        {student.enrollmentNo}
-                                      </div>
+                                    <img
+                                      className="h-10 w-10 rounded-full object-cover"
+                                      src={student.profileImage?.url || "https://via.placeholder.com/40"}
+                                      alt=""
+                                    />
+                                    <div className="ml-4">
+                                      <div className="text-sm font-medium text-gray-900">{student.name}</div>
+                                      <div className="text-sm text-gray-500">{student.email}</div>
                                     </div>
                                   </div>
                                 </td>
-                                <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap">
-                                  <div className="text-sm text-gray-900">{student.enrollmentNo}</div>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                  {student.enrollmentNo}
                                 </td>
-                                <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap">
-                                  <div className="text-sm text-gray-900">{student.admissionNo}</div>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                  {student.admissionNo}
                                 </td>
-                                <td className="px-3 md:px-6 py-4 whitespace-nowrap">
-                                  <div className="text-sm flex gap-1.5 text-red-500">
-                                    {student.totalFees - student.feesPaid}
-                                    <button className="text-blue-600 hover:text-blue-900 transition-colors duration-150">
-                                      <FaEdit className="h-4 w-4" />
-                                    </button>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <div className="text-sm text-red-500 font-medium">
+                                    ₹{student.totalFees - student.feesPaid}
                                   </div>
                                 </td>
-                                <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap">
-                                  <div className="text-sm text-gray-900">{student.mobile}</div>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                  {student.mobile}
                                 </td>
-                                <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap">
-                                  <div className="text-sm text-gray-900">{student.batch?.batchName || "N/A"}</div>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                  {student.batch?.batchName || "N/A"}
                                 </td>
-                                <td className="px-3 md:px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                                  <div className="flex justify-center space-x-2 md:space-x-3">
+                                <td className="px-6 py-4 whitespace-nowrap text-center">
+                                  <div className="flex items-center justify-center space-x-3">
                                     <button
                                       onClick={() => navigate(`/studentDetails/${student._id}`)}
-                                      className="text-indigo-600 hover:text-indigo-900 transition-colors duration-150"
+                                      className="text-indigo-600 hover:text-indigo-900 p-1.5"
                                       title="View Details"
                                     >
-                                      <FaEye className="h-4 w-4" />
+                                      <FaEye className="h-5 w-5" />
                                     </button>
                                     <button
                                       onClick={() => navigate(`/editStudent/${student._id}`)}
-                                      className="text-yellow-600 hover:text-yellow-900 transition-colors duration-150"
+                                      className="text-yellow-600 hover:text-yellow-900 p-1.5"
                                       title="Edit Student"
                                     >
-                                      <FaEdit className="h-4 w-4" />
+                                      <FaEdit className="h-5 w-5" />
                                     </button>
                                     <button
                                       onClick={() => handleDelete(student._id)}
-                                      className="text-red-600 hover:text-red-900 transition-colors duration-150"
+                                      className="text-red-600 hover:text-red-900 p-1.5"
                                       title="Delete Student"
                                     >
-                                      <FaTrash className="h-4 w-4" />
+                                      <FaTrash className="h-5 w-5" />
                                     </button>
                                   </div>
                                 </td>
@@ -237,28 +279,31 @@ const AllStudents = () => {
                         </tbody>
                       </table>
                     </div>
-                  </div>
+                  </>
                 )}
               </CardContent>
             </Card>
 
+            {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex justify-center mt-6 px-4">
-                <div className="flex flex-wrap justify-center gap-2">
+              <div className="flex justify-center mt-6">
+                <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-sm">
                   <Button
                     variant="secondary"
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
+                    className="py-2"
                   >
                     Previous
                   </Button>
-                  <span className="px-4 py-2 text-sm text-gray-700">
+                  <span className="px-4 py-2 text-sm font-medium text-gray-700">
                     Page {currentPage} of {totalPages}
                   </span>
                   <Button
                     variant="secondary"
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
+                    className="py-2"
                   >
                     Next
                   </Button>
@@ -271,5 +316,26 @@ const AllStudents = () => {
     </div>
   );
 };
+
+// Empty State Component
+const EmptyState = () => (
+  <div className="text-center py-12">
+    <div className="flex justify-center mb-4">
+      <div className="p-3 bg-gray-100 rounded-full">
+        <FaUserGraduate className="w-8 h-8 text-gray-400" />
+      </div>
+    </div>
+    <h3 className="text-lg font-medium text-gray-900 mb-2">No Students Found</h3>
+    <p className="text-gray-500 mb-6">There are currently no students in the system.</p>
+    <Button
+      variant="primary"
+      onClick={() => navigate("/students/add")}
+      className="inline-flex items-center justify-center gap-2"
+    >
+      <FaPlus />
+      Add New Student
+    </Button>
+  </div>
+);
 
 export default AllStudents;
