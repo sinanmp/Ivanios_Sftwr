@@ -138,59 +138,7 @@ const AllStudents = () => {
                   </div>
                 ) : (
                   <>
-                    {/* Mobile View */}
-                    <div className="md:hidden">
-                      {students.length === 0 ? (
-                        <EmptyState />
-                      ) : (
-                        <div className="divide-y divide-gray-200">
-                          {students.map((student) => (
-                            <div key={student._id} className="p-4 hover:bg-gray-50">
-                              <div className="flex items-center space-x-4">
-                                <img
-                                  src={student.profileImage?.url || "https://via.placeholder.com/40"}
-                                  alt=""
-                                  className="h-12 w-12 rounded-full object-cover"
-                                />
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium text-gray-900 truncate">{student.name}</p>
-                                  <p className="text-xs text-gray-500">{student.enrollmentNo}</p>
-                                  <p className="text-xs text-gray-500">{student.batch?.batchName || "No Batch"}</p>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <button
-                                    onClick={() => navigate(`/studentDetails/${student._id}`)}
-                                    className="p-2 text-indigo-600 hover:text-indigo-900"
-                                  >
-                                    <FaEye className="h-5 w-5" />
-                                  </button>
-                                  <button
-                                    onClick={() => navigate(`/editStudent/${student._id}`)}
-                                    className="p-2 text-yellow-600 hover:text-yellow-900"
-                                  >
-                                    <FaEdit className="h-5 w-5" />
-                                  </button>
-                                </div>
-                              </div>
-                              <div className="mt-2 flex justify-between items-center">
-                                <div className="text-sm text-red-500">
-                                  Pending: ₹{student.totalFees - student.feesPaid}
-                                </div>
-                                <button
-                                  onClick={() => handleDelete(student._id)}
-                                  className="text-red-600 hover:text-red-900 p-2"
-                                >
-                                  <FaTrash className="h-5 w-5" />
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Desktop View */}
-                    <div className="hidden md:block overflow-x-auto">
+                    <div className="overflow-x-auto rounded-lg border border-gray-200">
                       <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                           <tr>
