@@ -2,9 +2,52 @@ import BatchModel from "../model/BatchModel.js";
 import Batch from "../model/BatchModel.js";
 import Course from "../model/Course.model.js";
 import Student from "../model/StudentModel.js";
+import { deleteFromCloudinary, deleteMultipleFromCloudinary } from "../services/CloudinaryDelete.js";
 import 'dotenv/config';
 
 class Controller {
+
+
+  static async checkExistingStudent(req, res) {
+    try {
+      const { admissionNo, email, enrollmentNo } = req.body;
+  
+      const existingStudents = await Student.find({
+        $or: [
+          { admissionNo },
+          { email },
+          { enrollmentNo }
+        ]
+      });
+  
+      const result = {
+        admissionNoExists: false,
+        emailExists: false,
+        enrollmentNoExists: false
+      };
+  
+      for (const student of existingStudents) {
+        if (student.admissionNo === admissionNo) result.admissionNoExists = true;
+        if (student.email === email) result.emailExists = true;
+        if (student.enrollmentNo === enrollmentNo) result.enrollmentNoExists = true;
+      }
+  
+      res.status(200).json({
+        error: false,
+        message: "Check complete",
+        result
+      });
+  
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        error: true,
+        message: "Internal server error"
+      });
+    }
+  }
+  
+
 
 
   static async adminLogin(req, res) {
@@ -378,8 +421,8 @@ class Controller {
     try {
       const { id } = req.query;
       
-      // Find and delete the student
-      const student = await Student.findByIdAndDelete(id);
+      // First find the student to get their files
+      const student = await Student.findById(id);
       
       if (!student) {
         return res.status(404).json({
@@ -387,6 +430,35 @@ class Controller {
           message: "Student not found"
         });
       }
+
+      // Delete profile image from Cloudinary if exists
+      if (student.profileImage?.publicId) {
+        try {
+          await deleteFromCloudinary(student.profileImage.public_id);
+        } catch (cloudinaryError) {
+          console.error('Error deleting profile image from Cloudinary:', cloudinaryError);
+          // Continue with student deletion even if Cloudinary deletion fails
+        }
+      }
+
+      // Delete certificates from Cloudinary if any exist
+      if (student.certificates && student.certificates.length > 0) {
+        try {
+          const certificatePublicIds = student.certificates
+            .map(cert => cert.publicId)
+            .filter(id => id); // Filter out any null/undefined values
+          
+          if (certificatePublicIds.length > 0) {
+            await deleteMultipleFromCloudinary(certificatePublicIds);
+          }
+        } catch (cloudinaryError) {
+          console.error('Error deleting certificates from Cloudinary:', cloudinaryError);
+          // Continue with student deletion even if Cloudinary deletion fails
+        }
+      }
+
+      // Now delete the student from database
+      await Student.findByIdAndDelete(id);
 
       // Remove student reference from the batch
       if (student.batch) {
@@ -398,10 +470,10 @@ class Controller {
 
       res.status(200).json({
         error: false,
-        message: "Student deleted successfully"
+        message: "Student and associated files deleted successfully"
       });
     } catch (error) {
-      console.error(error);
+      console.error('Error in deleteStudent:', error);
       res.status(500).json({
         error: true,
         message: "Error deleting student"
@@ -412,7 +484,7 @@ class Controller {
   static async updateStudent(req, res) {
     try {
       const { id } = req.query;
-      const { name, email, mobile, enrollmentNo, admissionNo, certificates = [], batch, totalFees, feesPaid } = req.body;
+      const { name, email, mobile, enrollmentNo, admissionNo, certificates = [] } = req.body;
       console.log(certificates , "this is certificates")
   
       const student = await Student.findById(id);
@@ -434,9 +506,6 @@ class Controller {
       student.enrollmentNo = enrollmentNo;
       student.admissionNo = admissionNo;
       student.certificates = updatedCertificates;
-      student.batch = batch;
-      student.totalFees = totalFees;
-      student.feesPaid = feesPaid;
   
       // Save updated student
       await student.save();
@@ -457,23 +526,28 @@ class Controller {
 
   static async addStudent(req, res) {
     try {
-      const { name, email, mobile, enrollmentNo, admissionNo, profileImage, certificates, batch, totalFees, feesPaid } = req.body;
+      const { name, email, mobile, enrollmentNo, admissionNo, profileImage, certificates, batch, totalFees, feesPaid ,feeTransactions} = req.body;
 
       // Check if student with same email or enrollment number already exists
       const existingStudent = await Student.findOne({
         $or: [
           { email: email },
-          { enrollmentNo: enrollmentNo }
+          { enrollmentNo: enrollmentNo },
+          {admissionNo:admissionNo}
         ]
       });
 
       if (existingStudent) {
         return res.status(400).json({
           error: true,
-          message: "Student with this email or enrollment number already exists"
+          message: "Student with this email or enrollment number or admission number already exists"
         });
       }
 
+      const newFeeTransactions = feeTransactions.map(transaction => ({
+        ...transaction,
+        amount: parseFloat(feesPaid)
+      }));
       // Create new student
       const newStudent = new Student({
         name,
@@ -485,8 +559,11 @@ class Controller {
         certificates,
         batch,
         totalFees,
-        feesPaid
+        feesPaid,
+        feeTransactions: newFeeTransactions
       });
+
+      await BatchModel.findByIdAndUpdate(batch, { $push: { students: newStudent._id } });
 
       await newStudent.save();
 
@@ -503,6 +580,90 @@ class Controller {
       });
     }
   }
+
+  static async addFeePayment(req, res) {
+    try {
+      const { id } = req.query;
+      const { amount, date } = req.body;
+
+      const student = await Student.findById(id);
+      if (!student) {
+        return res.status(404).json({
+          error: true,
+          message: "Student not found"
+        });
+      }
+
+      // Add the new fee transaction
+      const newTransaction = {
+        amount: parseFloat(amount),
+        date: new Date(date),
+        createdAt: new Date()
+      };
+
+      // Update student's fees paid and add transaction to history
+      student.feesPaid += parseFloat(amount);
+      student.feeTransactions = student.feeTransactions || [];
+      student.feeTransactions.push(newTransaction);
+
+      await student.save();
+
+      res.status(200).json({
+        error: false,
+        student: student
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        error: true,
+        message: "Internal server error"
+      });
+    }
+  }
+
+  static async addFeePayment(req, res) {
+    try {
+      const { id } = req.query;
+      const { amount, date ,mode ,remarks} = req.body;
+
+      const student = await Student.findById(id);
+      if (!student) {
+        return res.status(404).json({
+          error: true,
+          message: "Student not found"
+        });
+      }
+
+      // Add the new fee transaction
+      const newTransaction = {
+        amount: parseFloat(amount),
+        date: new Date(date),
+        mode: mode,
+        remarks: remarks,
+        createdAt: new Date()
+      };
+
+      // Update student's fees paid and add transaction to history
+      student.feesPaid += parseFloat(amount);
+      student.feeTransactions = student.feeTransactions || [];
+      student.feeTransactions.push(newTransaction);
+
+      await student.save();
+
+      res.status(200).json({
+        error: false,
+        student: student,
+        message: "Fee payment added successfully"
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        error: true,
+        message: "Internal server error"
+      });
+    }
+  }
+  
 }
 
 export default Controller;

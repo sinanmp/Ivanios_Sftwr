@@ -54,11 +54,20 @@ const AllStudents = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this student?")) {
       try {
-        await api.delete(`/students/${id}`);
-        toast.success("Student deleted successfully");
-        fetchStudents();
+        setLoading(true);
+         const res = await api.deleteStudent(id);
+         console.log(res,"this is res");
+         if(res && !res.error){
+          toast.success("Student deleted successfully");
+          fetchStudents();
+         }else{
+          toast.error("Failed to delete student");
+         }
       } catch (error) {
+        console.log(error,"this is error");
         toast.error("Failed to delete student");
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -238,8 +247,12 @@ const AllStudents = () => {
                                   {student.admissionNo}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                  <div className="text-sm text-red-500 font-medium">
-                                    ₹{student.totalFees - student.feesPaid}
+                                  <div className="text-sm text-gray-900">
+                                    {student.totalFees - student.feesPaid > 0 ? (
+                                      `₹${student.totalFees - student.feesPaid}`
+                                    ) : (
+                                      <span className="text-green-600 font-medium">No Pending</span>
+                                    )}
                                   </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

@@ -1,19 +1,19 @@
 import axios from "axios";
 
 // Create an Axios instance
-const API = axios.create({
-  baseURL: "http://localhost:3001/api",
-  withCredentials: true,
-});
+// const API = axios.create({
+//   baseURL: "http://localhost:3001/api",
+//   withCredentials: true,
+// });
 // const API = axios.create({
 //   baseURL: "https://ivanios-portal-api.vercel.app/api",
 //   withCredentials: true,
 // });
 
-// const API = axios.create({
-//   baseURL: "https://api.ivaniosedutech.com/api",
-//   withCredentials: true,
-// });
+const API = axios.create({
+  baseURL: "https://api.ivaniosedutech.com/api",
+  withCredentials: true,
+});
 
 // Admin Login
 async function login(data) {
@@ -212,6 +212,28 @@ export const addStudent = async (studentData) => {
   }
 };
 
+async function addFeePayment(id, data) {
+  try {
+    const response = await API.post(`/addFeePayment?id=${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error.response ? error.response.data : { error: "Network Error" };
+  }
+}
+
+
+async function checkExistingStudent(data){
+  try{
+    const response = await API.post("/checkExistingStudent", data);
+    return response.data;
+  }
+  catch(error){
+    console.log(error)
+    return error.response ? error.response.data:{error : "Network Error"}
+  }
+}
+
 export default {
   login,
   addStudentToBatch,
@@ -231,5 +253,7 @@ export default {
   updateCourse,
   getAllCourses,
   addCourse,
-  addStudent
+  addStudent,
+  addFeePayment,
+  checkExistingStudent
 };
