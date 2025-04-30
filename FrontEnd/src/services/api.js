@@ -212,6 +212,28 @@ export const addStudent = async (studentData) => {
   }
 };
 
+async function addFeePayment(id, data) {
+  try {
+    const response = await API.post(`/addFeePayment?id=${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return error.response ? error.response.data : { error: "Network Error" };
+  }
+}
+
+
+async function checkExistingStudent(data){
+  try{
+    const response = await API.post("/checkExistingStudent", data);
+    return response.data;
+  }
+  catch(error){
+    console.log(error)
+    return error.response ? error.response.data:{error : "Network Error"}
+  }
+}
+
 export default {
   login,
   addStudentToBatch,
@@ -231,5 +253,7 @@ export default {
   updateCourse,
   getAllCourses,
   addCourse,
-  addStudent
+  addStudent,
+  addFeePayment,
+  checkExistingStudent
 };

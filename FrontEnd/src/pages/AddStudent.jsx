@@ -17,30 +17,35 @@ const AddStudent = () => {
   const [selectedBatch, setSelectedBatch] = useState("");
   const [formData, setFormData] = useState({
     name: "",
-    enrollmentNo: "",
-    admissionNo: "",
     email: "",
     mobile: "",
+    enrollmentNo: "",
+    admissionNo: "",
+    address: "",
+    profileImage: null,
+    certificates: [],
     batch: "",
     course: "",
-    totalFees: "",
-    feesPaid: "",
-    profileImage: null,
-    certificates: []
+    totalFees: 0,
+    feesPaid: 0,
+    feeTransactions: [{
+      amount: 0,
+      date: new Date().toISOString().split('T')[0],
+      mode: "cash",
+      remarks: ""
+    }]
   });
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
   const [previewImage, setPreviewImage] = useState(null);
   const [certificateNames, setCertificateNames] = useState([]);
 
-
-
   useEffect(() => {
     fetchBatches();
   }, []);
 
-    const fetchBatches = async () => {
-      try {
+  const fetchBatches = async () => {
+    try {
       const response = await api.getAllBatches();
       if (response && !response.error) {
         setBatches(response.batches || []);
@@ -53,9 +58,58 @@ const AddStudent = () => {
     }
   };
 
-
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
+    // Special handling for fees paid
+    if (name === 'feesPaid') {
+      const totalFees = parseFloat(formData.totalFees) || 0;
+      const feesPaid = parseFloat(value) || 0;
+      
+      if (feesPaid > totalFees) {
+        setErrors(prev => ({
+          ...prev,
+          feesPaid: "Fees paid cannot exceed total fees"
+        }));
+        return;
+      }
+    }
+
+    // Special handling for mobile number
+    if (name === 'mobile') {
+      // Remove any non-digit characters
+      const cleanedValue = value.replace(/\D/g, '');
+      
+      // Check if the length is more than 10 digits
+      if (cleanedValue.length > 10) {
+        setErrors(prev => ({
+          ...prev,
+          mobile: "Mobile number must be exactly 10 digits"
+        }));
+        return;
+      }
+      
+      // Update the value with only digits
+      setFormData(prev => ({
+        ...prev,
+        [name]: cleanedValue
+      }));
+      
+      // Clear error if the length is exactly 10 digits
+      if (cleanedValue.length === 10) {
+        setErrors(prev => ({
+          ...prev,
+          mobile: ""
+        }));
+      } else if (cleanedValue.length > 0) {
+        setErrors(prev => ({
+          ...prev,
+          mobile: "Mobile number must be exactly 10 digits"
+        }));
+      }
+      return;
+    }
+
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -69,26 +123,25 @@ const AddStudent = () => {
     }
   };
 
-  const handleCourseChange = (e) => {
-    const courseId = e.target.value;
-    const selectedBatchData = batches.find(b => b._id === selectedBatch);
-    const selectedCourse = selectedBatchData?.courses.find(c => c._id === courseId);
-
-    setFormData(prev => ({
-      ...prev,
-      course: courseId,
-      totalFees: selectedCourse?.fees || ""
-    }));
-  };
-
   const handleBatchChange = (e) => {
     const batchId = e.target.value;
-    setSelectedBatch(batchId);
     setFormData(prev => ({
       ...prev,
       batch: batchId,
       course: "", // Reset course when batch changes
-      totalFees: "" // Reset total fees when batch changes
+      totalFees: 0 // Reset total fees when batch changes
+    }));
+  };
+
+  const handleCourseChange = (e) => {
+    const courseId = e.target.value;
+    const selectedBatchData = batches.find(b => b._id === formData.batch);
+    const selectedCourse = selectedBatchData?.courses.find(c => c._id === courseId);
+    
+    setFormData(prev => ({
+      ...prev,
+      course: courseId,
+      totalFees: selectedCourse?.fees || 0
     }));
   };
 
@@ -156,33 +209,64 @@ const AddStudent = () => {
     }));
   };
 
-  const validateForm = () => {
+  const validateForm = async() => {
     const newErrors = {};
+    
+    // Personal Information Validation
     if (!formData.name) newErrors.name = "Name is required";
-    if (!formData.enrollmentNo) newErrors.enrollmentNo = "Enrollment number is required";
-    if (!formData.admissionNo) newErrors.admissionNo = "Admission number is required";
     if (!formData.email) newErrors.email = "Email is required";
     if (!formData.mobile) newErrors.mobile = "Mobile number is required";
+    if (!formData.enrollmentNo) newErrors.enrollmentNo = "Enrollment number is required";
+    if (!formData.admissionNo) newErrors.admissionNo = "Admission number is required";
+
+    // Fee Information Validation
     if (!formData.batch) newErrors.batch = "Batch is required";
     if (!formData.course) newErrors.course = "Course is required";
     if (!formData.totalFees) newErrors.totalFees = "Total fees is required";
     if (!formData.feesPaid) newErrors.feesPaid = "Fees paid is required";
-
-    // Validate certificates
-    if (formData.certificates.length > 0) {
-      formData.certificates.forEach((cert, index) => {
-        if (!cert.type) {
-          newErrors[`certificateType-${index}`] = "Certificate type is required";
-        }
-        if (cert.type === "other" && !cert.otherType) {
-          newErrors[`certificateOtherType-${index}`] = "Please specify certificate type";
-        }
-        if (!cert.file) {
-          newErrors[`certificateFile-${index}`] = "Certificate file is required";
-        }
-      });
+    
+    // Validate fees paid is not greater than total fees
+    if (parseFloat(formData.feesPaid) > parseFloat(formData.totalFees)) {
+        newErrors.feesPaid = "Fees paid cannot exceed total fees";
     }
 
+    // Validate fee transaction details
+    if (!formData.feeTransactions[0].date) {
+        newErrors.paymentDate = "Payment date is required";
+    }
+    if (!formData.feeTransactions[0].mode) {
+        newErrors.paymentMode = "Payment mode is required";
+    }
+
+    // Certificate Validation
+    if (formData.certificates.length > 0) {
+        formData.certificates.forEach((cert, index) => {
+            if (!cert.type) {
+                newErrors[`certificateType-${index}`] = "Certificate type is required";
+            }
+            if (cert.type === "other" && !cert.otherType) {
+                newErrors[`certificateOtherType-${index}`] = "Please specify certificate type";
+            }
+            if (!cert.file) {
+                newErrors[`certificateFile-${index}`] = "Certificate file is required";
+            }
+        });
+    }
+
+
+
+    const response = await api.checkExistingStudent(formData);
+    if(response && !response.error){
+      if(response.result.admissionNoExists){
+        newErrors.admissionNo = "Student with this admission number already exists";
+      }
+      if(response.result.enrollmentNoExists){
+        newErrors.enrollmentNo = "Student with this enrollment number already exists";
+      }
+      if(response.result.emailExists){
+        newErrors.email = "Student with this email already exists";
+      }
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -198,7 +282,7 @@ const AddStudent = () => {
       setLoading(true);
       
       // Ensure totalFees is set from the selected course
-      const selectedBatchData = batches.find(b => b._id === selectedBatch);
+      const selectedBatchData = batches.find(b => b._id === formData.batch);
       const selectedCourse = selectedBatchData?.courses.find(c => c._id === formData.course);
       
       if (!selectedCourse) {
@@ -266,6 +350,8 @@ const AddStudent = () => {
   };
 
   return (
+    <>
+    {loading && <Spinner />}
     <div className="flex h-screen bg-gray-100">
       <Sidebar />
       <div className="flex-1 flex flex-col">
@@ -290,177 +376,11 @@ const AddStudent = () => {
               />
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Name */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Name <span className="text-red-500">*</span>
-                      </label>
-                      <Input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        placeholder="Enter student's name"
-                        icon={<FaUser className="text-gray-400" />}
-                        error={errors.name}
-                      />
-            </div>
-
-                    {/* Enrollment Number */}
-                <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Enrollment Number <span className="text-red-500">*</span>
-                      </label>
-                      <Input
-                    type="text"
-                        name="enrollmentNo"
-                        value={formData.enrollmentNo}
-                        onChange={handleChange}
-                        placeholder="Enter enrollment number"
-                        icon={<FaIdCard className="text-gray-400" />}
-                        error={errors.enrollmentNo}
-                      />
-                </div>
-
-                    {/* Admission Number */}
-                <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Admission Number <span className="text-red-500">*</span>
-                      </label>
-                      <Input
-                    type="text"
-                        name="admissionNo"
-                        value={formData.admissionNo}
-                        onChange={handleChange}
-                        placeholder="Enter admission number"
-                        icon={<FaIdCard className="text-gray-400" />}
-                        error={errors.admissionNo}
-                      />
-                </div>
-
-                    {/* Email */}
-                <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Email <span className="text-red-500">*</span>
-                      </label>
-                      <Input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        placeholder="Enter email address"
-                        icon={<FaEnvelope className="text-gray-400" />}
-                        error={errors.email}
-                      />
-                </div>
-
-                    {/* Mobile */}
-                <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Mobile Number <span className="text-red-500">*</span>
-                      </label>
-                      <Input
-                        type="tel"
-                        name="mobile"
-                        value={formData.mobile}
-                        onChange={handleChange}
-                        placeholder="Enter mobile number"
-                        icon={<FaPhone className="text-gray-400" />}
-                        error={errors.mobile}
-                      />
-                </div>
-
-                    {/* Batch */}
-                <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Batch <span className="text-red-500">*</span>
-                      </label>
-                  <select
-                        name="batch"
-                        value={formData.batch}
-                        onChange={handleBatchChange}
-                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                          errors.batch ? "border-red-500" : "border-gray-200"
-                        }`}
-                      >
-                        <option value="">Select Batch</option>
-                        {batches.map((batch) => (
-                          <option key={batch._id} value={batch._id}>
-                        {batch.batchName}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.batch && (
-                        <p className="mt-1 text-sm text-red-500">{errors.batch}</p>
-                  )}
-                </div>
-
-                    {/* Course */}
-                <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Course <span className="text-red-500">*</span>
-                      </label>
-                  <select
-                        name="course"
-                        value={formData.course}
-                        onChange={handleCourseChange}
-                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                          errors.course ? "border-red-500" : "border-gray-200"
-                        }`}
-                        disabled={!selectedBatch}
-                      >
-                        <option value="">Select Course</option>
-                        {selectedBatch && batches.find(b => b._id === selectedBatch)?.courses.map((course) => (
-                          <option key={course._id} value={course._id}>
-                            {course.name} - ₹{course.fees}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.course && (
-                        <p className="mt-1 text-sm text-red-500">{errors.course}</p>
-                  )}
-                </div>
-
-                    {/* Total Fees */}
-                <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Total Fees <span className="text-red-500">*</span>
-                      </label>
-                      <Input
-                        type="number"
-                        name="totalFees"
-                        value={formData.totalFees}
-                        onChange={handleChange}
-                        placeholder="Total fees will be set automatically"
-                        icon={<FaMoneyBillWave className="text-gray-400" />}
-                        error={errors.totalFees}
-                        readOnly
-                      />
-                      {formData.totalFees && (
-                        <p className="mt-1 text-sm text-gray-500">
-                          Total Fees: ₹{formData.totalFees}
-                        </p>
-                  )}
-                </div>
-
-                    {/* Fees Paid */}
-                <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Fees Paid <span className="text-red-500">*</span>
-                      </label>
-                      <Input
-                        type="number"
-                        name="feesPaid"
-                        value={formData.feesPaid}
-                        onChange={handleChange}
-                        placeholder="Enter fees paid"
-                        icon={<FaMoneyBillWave className="text-gray-400" />}
-                        error={errors.feesPaid}
-                  />
-                </div>
-
-                    {/* Profile Image Upload */}
+                  {/* Personal Information Section */}
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-medium text-gray-900">Personal Information</h3>
+                    
+                    {/* Profile Image Section - Moved to top */}
                     <div className="space-y-4">
                       <label className="block text-sm font-medium text-gray-700">
                         Profile Image
@@ -489,9 +409,9 @@ const AddStudent = () => {
                             <div className="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-300">
                               <FaImage className="text-gray-400 text-2xl" />
                             </div>
-                  )}
-                </div>
-                <div>
+                          )}
+                        </div>
+                        <div>
                           <input
                             type="file"
                             accept="image/*"
@@ -505,12 +425,112 @@ const AddStudent = () => {
                           >
                             <FaImage className="mr-2" />
                             Upload Image
-                        </label>
+                          </label>
                         </div>
                       </div>
                     </div>
 
-                    {/* Certificates Upload */}
+                    {/* Personal Details Form Fields */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Name */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Name <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                          type="text"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          placeholder="Enter student's name"
+                          icon={<FaUser className="text-gray-400" />}
+                          error={errors.name}
+                        />
+                      </div>
+
+                      {/* Enrollment Number */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Enrollment Number <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                          type="text"
+                          name="enrollmentNo"
+                          value={formData.enrollmentNo}
+                          onChange={handleChange}
+                          placeholder="Enter enrollment number"
+                          icon={<FaIdCard className="text-gray-400" />}
+                          error={errors.enrollmentNo}
+                        />
+                      </div>
+
+                      {/* Admission Number */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Admission Number <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                          type="text"
+                          name="admissionNo"
+                          value={formData.admissionNo}
+                          onChange={handleChange}
+                          placeholder="Enter admission number"
+                          icon={<FaIdCard className="text-gray-400" />}
+                          error={errors.admissionNo}
+                        />
+                      </div>
+
+                      {/* Email */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Email <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          placeholder="Enter email address"
+                          icon={<FaEnvelope className="text-gray-400" />}
+                          error={errors.email}
+                        />
+                      </div>
+
+                      {/* Mobile */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Mobile Number <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                          type="tel"
+                          name="mobile"
+                          value={formData.mobile}
+                          onChange={handleChange}
+                          placeholder="Enter mobile number"
+                          icon={<FaPhone className="text-gray-400" />}
+                          error={errors.mobile}
+                        />
+                      </div>
+
+                      {/* Address */}
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Address
+                        </label>
+                        <textarea
+                          value={formData.address}
+                          onChange={(e) => setFormData(prev => ({
+                            ...prev,
+                            address: e.target.value
+                          }))}
+                          placeholder="Enter student's address"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          rows="3"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Certificates Section - Moved to bottom of personal information */}
                     <div className="space-y-4">
                       <label className="block text-sm font-medium text-gray-700">
                         Certificates
@@ -545,18 +565,18 @@ const AddStudent = () => {
                                       placeholder="Enter certificate type"
                                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                       required
-                      />
-                    </div>
-                  )}
-                </div>
+                                    />
+                                  </div>
+                                )}
+                              </div>
                               <div className="flex-1">
                                 <label className="block text-xs text-gray-500 mb-1">Certificate File <span className="text-red-500">*</span></label>
                                 <div className="flex items-center space-x-2">
-                          <input
-                            type="file"
+                                  <input
+                                    type="file"
                                     accept=".pdf,.doc,.docx"
                                     onChange={(e) => handleCertificateUpload(index, e)}
-                            className="hidden"
+                                    className="hidden"
                                     id={`certificate-${index}`}
                                   />
                                   <label
@@ -565,32 +585,177 @@ const AddStudent = () => {
                                   >
                                     <FaFileAlt className="mr-2" />
                                     {cert.file ? "Change File" : "Upload File"}
-                        </label>
+                                  </label>
                                   {cert.file && (
                                     <span className="text-xs text-gray-500">
                                       {cert.file.name}
                                     </span>
                                   )}
                                 </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeCertificate(index)}
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => removeCertificate(index)}
                                 className="text-red-500 hover:text-red-700 mt-6"
-                      >
+                              >
                                 <FaTimes />
-                      </button>
+                              </button>
                             </div>
-                    </div>
-                  ))}
-                  <button
-                    type="button"
+                          </div>
+                        ))}
+                        <button
+                          type="button"
                           onClick={addNewCertificate}
                           className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
+                        >
                           <FaFileAlt className="mr-2" />
                           Add Certificate
-                  </button>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Fee Information Section */}
+                  <div className="mt-8 pt-8 border-t border-gray-200">
+                    <h3 className="text-lg font-medium text-gray-900 mb-6">Fee Information</h3>
+                    <div className="space-y-6">
+                      {/* Batch and Course Selection */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Batch Selection */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Batch <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            value={formData.batch}
+                            onChange={handleBatchChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            required
+                          >
+                            <option value="">Select Batch</option>
+                            {batches.map((batch) => (
+                              <option key={batch._id} value={batch._id}>
+                                {batch.batchName}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Course Selection */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Course <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            value={formData.course}
+                            onChange={handleCourseChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            required
+                            disabled={!formData.batch}
+                          >
+                            <option value="">Select Course</option>
+                            {formData.batch && batches.find(b => b._id === formData.batch)?.courses.map((course) => (
+                              <option key={course._id} value={course._id}>
+                                {course.name} - ₹{course.fees}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Fee Payment Details */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Total Fees */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Total Fees <span className="text-red-500">*</span>
+                          </label>
+                          <Input
+                            type="number"
+                            value={formData.totalFees}
+                            readOnly
+                            className="bg-gray-100"
+                            placeholder="Total fees will be set automatically based on course"
+                          />
+                        </div>
+
+                        {/* Fees Paid */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Fees Paid <span className="text-red-500">*</span>
+                          </label>
+                          <Input
+                            type="number"
+                            value={formData.feesPaid}
+                            onChange={handleChange}
+                            name="feesPaid"
+                            placeholder="Enter fees paid"
+                            required
+                          />
+                        </div>
+
+                        {/* Payment Date */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Payment Date <span className="text-red-500">*</span>
+                          </label>
+                          <Input
+                            type="date"
+                            value={formData.feeTransactions[0].date}
+                            onChange={(e) => setFormData(prev => ({
+                              ...prev,
+                              feeTransactions: [{
+                                ...prev.feeTransactions[0],
+                                date: e.target.value
+                              }]
+                            }))}
+                            required
+                          />
+                        </div>
+
+                        {/* Payment Mode */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Payment Mode <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            value={formData.feeTransactions[0].mode}
+                            onChange={(e) => setFormData(prev => ({
+                              ...prev,
+                              feeTransactions: [{
+                                ...prev.feeTransactions[0],
+                                mode: e.target.value
+                              }]
+                            }))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            required
+                          >
+                            <option value="cash">Cash</option>
+                            <option value="online">Online</option>
+                            <option value="cheque">Cheque</option>
+                            <option value="bank_transfer">Bank Transfer</option>
+                          </select>
+                        </div>
+
+                        {/* Remarks */}
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Remarks
+                          </label>
+                          <textarea
+                            value={formData.feeTransactions[0].remarks}
+                            onChange={(e) => setFormData(prev => ({
+                              ...prev,
+                              feeTransactions: [{
+                                ...prev.feeTransactions[0],
+                                remarks: e.target.value
+                              }]
+                            }))}
+                            placeholder="Enter any remarks or notes about the payment"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            rows="3"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -616,17 +781,18 @@ const AddStudent = () => {
                       disabled={loading}
                       className="flex items-center gap-2"
                     >
-                      {loading ? <Spinner size="sm" /> : <FaUser />}
+                      {loading ? '' : <FaUser />}
                       {loading ? "Adding Student..." : "Add Student"}
                     </Button>
-                </div>
-              </form>
+                  </div>
+                </form>
               </CardContent>
             </Card>
           </div>
         </div>
       </div>
     </div>
+    </>
   );
 };
 

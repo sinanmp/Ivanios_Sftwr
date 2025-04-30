@@ -16,6 +16,7 @@ app.use(cors({
     'http://192.168.137.1:5173',
     'https://ivaniosportal.vercel.app',
     'https://admin.ivaniosedutech.com',
+    'http://192.168.197.105:5173',
   ],
   credentials: true
 }));

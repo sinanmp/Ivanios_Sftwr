@@ -20,4 +20,6 @@ router.put("/updateCourse/:id", Controller.updateCourse);
 router.put("/updateStudent", Controller.updateStudent);
 router.get("/getCourseDetails", Controller.getCourseDetails);
 router.post("/addStudent", Controller.addStudent);
+router.post("/addFeePayment", Controller.addFeePayment);
+router.post("/checkExistingStudent", Controller.checkExistingStudent);
 export default router;   

@@ -7,12 +7,12 @@ const studentSchema = new mongoose.Schema({
   admissionNo: { type: String, required: true, unique: true },
   mobile: { type: String, required: true },
   batch: { type: mongoose.Schema.Types.ObjectId, ref: 'Batch', required: true },
-  totalFees: { type: Number, required: true }, 
+  totalFees: { type: Number, required: true },
   feesPaid: { type: Number, required: true },
-  profileImage: { 
-    url:String ,
-    publicId:String
-   }, // Now storing Cloudinary URL
+  profileImage: {
+    url: String,
+    publicId: String
+  },
   certificates: [
     {
       type: {
@@ -24,11 +24,19 @@ const studentSchema = new mongoose.Schema({
         default: ''
       },
       url: {
-        type: String, // Now storing Cloudinary URL
+        type: String,
         required: true
       },
-      publicId:String
+      publicId: String
     }
+  ],
+  feeTransactions: [
+    {
+      amount: { type: Number, required: true },
+      date: { type: Date, default: Date.now },
+      mode: { type: String, required: true }, // e.g., 'cash', 'online', 'cheque'
+      remarks: { type: String, default: '' }
+    }   
   ]
 }, { timestamps: true });
 
