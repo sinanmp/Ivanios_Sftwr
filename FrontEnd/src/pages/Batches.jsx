@@ -35,7 +35,6 @@ const BatchesPage = () => {
     try {
       setLoading(true);
       const response = await api.getAllBatches();
-      console.log('Batches response:', response); // Debug log
       if (response && !response.error) {
         setBatches(response.batches || []);
       } else {

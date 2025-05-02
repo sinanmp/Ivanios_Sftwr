@@ -113,9 +113,7 @@ const AddBatch = () => {
 
     try {
       setLoading(true);
-      console.log('Submitting batch data:', formData);  // Debug log
       const response = await api.createBatch(formData);
-      console.log('Create batch response:', response);  // Debug log
       if (response && !response.error) {
         toast.success("Batch created successfully");
         navigate("/batches/all");

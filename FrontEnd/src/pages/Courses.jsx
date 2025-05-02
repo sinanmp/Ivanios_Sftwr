@@ -33,7 +33,6 @@ const CoursesPage = () => {
     try {
       setLoading(true);
       const response = await api.fetchCourses();
-      console.log('Courses response:', response); // Debug log
       if (response && !response.error) {
         setCourses(response.data || []);
       } else {

@@ -135,7 +135,6 @@ const AddCourse = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData,"form Submited");
     if (!validateForm()) return;
 
     try {
@@ -148,7 +147,6 @@ const AddCourse = () => {
       });
 
       if (response && !response.error) {
-        console.log(response,"response");
         toast.success("Course added successfully");
         
         // Check if we came from the add batch page
