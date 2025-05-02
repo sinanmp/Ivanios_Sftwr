@@ -252,7 +252,10 @@ class Controller {
       const id = req.query.id;
       const batch = await BatchModel.findById(id)
         .populate('courses', 'name duration fees description') // Populate course details
-        .populate('students', 'name email enrollmentNo admissionNo');
+        .populate({
+          path: 'students',
+          select: 'name email enrollmentNo admissionNo profileImage'
+        });
 
       if (!batch) {
         return res.status(404).json({
@@ -260,11 +263,12 @@ class Controller {
           message: "Batch not found"
         });
       }
-
+      console.log(batch , "this is batch");
+      
       res.status(200).json({
         error: false,
         message: "Batch fetched successfully",
-        data: batch
+        batch: batch
       });
     } catch (error) {
       console.error(error);
@@ -663,7 +667,33 @@ class Controller {
       });
     }
   }
-  
+
+
+  static async updateBatches(req, res) {
+    try {
+      const { id } = req.params;
+      const { batchName, startDate, endDate, courses } = req.body;
+
+      const batch = await BatchModel.findByIdAndUpdate(id, {
+        batchName,
+        startDate,
+        endDate,
+        courses
+      }, { new: true });
+
+      res.status(200).json({
+        error: false,
+        message: "Batch updated successfully",
+        batch
+      });
+    } catch (error) {
+      console.error(error); 
+      res.status(500).json({
+        error: true,
+        message: "Internal server error"
+      });
+    }
+  }
 }
 
 export default Controller;

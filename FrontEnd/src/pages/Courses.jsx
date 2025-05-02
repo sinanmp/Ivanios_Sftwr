@@ -111,7 +111,7 @@ const CoursesPage = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                             <div className="flex justify-center space-x-3">
                               <button
-                                onClick={() => navigate(`/courses/${course._id}`)}
+                                onClick={() => navigate(`/courseDetails/${course._id}`)}
                                 className="text-indigo-600 hover:text-indigo-900 transition-colors duration-150"
                                 title="View Details"
                               >

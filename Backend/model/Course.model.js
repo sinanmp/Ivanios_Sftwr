@@ -17,8 +17,7 @@ const courseSchema = new mongoose.Schema({
     min: 0
   },
   description: {
-    type: String,
-    required: true
+    type: String
   }
 }, { timestamps: true });
 

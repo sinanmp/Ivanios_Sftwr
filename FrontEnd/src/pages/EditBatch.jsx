@@ -9,6 +9,7 @@ import Spinner from "../components/Spinner";
 import { toast } from "react-toastify";
 import api from "../services/api";
 import { format } from "date-fns";
+import { FaTimes, FaPlus } from "react-icons/fa";
 
 const EditBatch = () => {
   const { id } = useParams();
@@ -22,13 +23,15 @@ const EditBatch = () => {
     endDate: "",
     courses: [],
   });
+  const [selectedCourses, setSelectedCourses] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Fetch batch details
         const batchResponse = await api.getBatchDetails(id);
-        if (batchResponse && batchResponse.batch) {
+        console.log(batchResponse);
+        if (batchResponse && !batchResponse.error) {
           setBatch(batchResponse.batch);
           setFormData({
             batchName: batchResponse.batch.batchName,
@@ -36,11 +39,13 @@ const EditBatch = () => {
             endDate: format(new Date(batchResponse.batch.endDate), "yyyy-MM-dd"),
             courses: batchResponse.batch.courses || [],
           });
+          // Set selected courses from batch data
+          setSelectedCourses(batchResponse.batch.courses || []);
         }
 
         // Fetch all courses
-        const coursesResponse = await api.getCourses();
-        if (coursesResponse && coursesResponse.data) {
+        const coursesResponse = await api.getAllCourses();
+        if (coursesResponse && !coursesResponse.error) {
           setCourses(coursesResponse.data);
         }
       } catch (error) {
@@ -56,39 +61,60 @@ const EditBatch = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await api.updateBatch(id, formData);
+      setLoading(true);
+      const response = await api.updateBatch(id, {
+        ...formData,
+        courses: selectedCourses.map(course => course._id)
+      });
+      
       if (response && !response.error) {
         toast.success("Batch updated successfully");
         navigate("/batches/all");
       } else {
-        throw new Error(response.message || "Failed to update batch");
+        throw new Error(response?.message || "Failed to update batch");
       }
     } catch (error) {
-      toast.error(error.message || "Failed to update batch");
+      console.error("Error updating batch:", error);
+      toast.error(error.response?.data?.message || "Failed to update batch");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const handleCourseSelect = (e) => {
+    const courseId = e.target.value;
+    if (!courseId) return;
+
+    const selectedCourse = courses.find(course => course._id === courseId);
+    if (selectedCourse && !selectedCourses.some(course => course._id === courseId)) {
+      setSelectedCourses([...selectedCourses, selectedCourse]);
+    }
   };
 
-  const handleCourseChange = (courseId) => {
-    setFormData((prev) => {
-      const newCourses = prev.courses.includes(courseId)
-        ? prev.courses.filter(id => id !== courseId)
-        : [...prev.courses, courseId];
-      return {
-        ...prev,
-        courses: newCourses,
-      };
-    });
+  const removeCourse = (courseId) => {
+    setSelectedCourses(selectedCourses.filter(course => course._id !== courseId));
   };
 
-  if (loading) return <Spinner />;
+  // Get available courses (courses that are not already selected)
+  const availableCourses = courses.filter(
+    course => !selectedCourses.some(selected => selected._id === course._id)
+  );
+
+  if (loading) {
+    return (
+      <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <Sidebar />
+        <div className="flex-1 flex flex-col md:ml-64" style={{ marginLeft: 'var(--sidebar-width, 16rem)' }}>
+          <TopNav />
+          <main className="flex-1 overflow-y-auto p-6 pt-24">
+            <div className="flex justify-center items-center h-64">
+              <Spinner size="lg" />
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -96,9 +122,9 @@ const EditBatch = () => {
       <div className="flex-1 flex flex-col md:ml-64" style={{ marginLeft: 'var(--sidebar-width, 16rem)' }}>
         <TopNav />
         <main className="flex-1 overflow-y-auto p-6">
-          <div className="max-w-3xl mx-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h1 className="text-2xl font-semibold text-gray-800">Edit Batch</h1>
+          <div className="max-w-4xl mx-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-2xl font-bold text-gray-800">Edit Batch</h1>
               <Button
                 variant="secondary"
                 onClick={() => navigate("/batches/all")}
@@ -106,85 +132,110 @@ const EditBatch = () => {
                 Back to Batches
               </Button>
             </div>
-            <Card variant="elevated" hoverable>
+
+            <Card>
               <CardHeader
                 title="Batch Information"
-                subtitle="Update the batch details below"
+                subtitle="Update batch details"
               />
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  <div>
-                    <label htmlFor="batchName" className="block text-sm font-medium text-gray-700">
-                      Batch Name
-                    </label>
-                    <Input
-                      type="text"
-                      id="batchName"
-                      name="batchName"
-                      value={formData.batchName}
-                      onChange={handleChange}
-                      required
-                      className="mt-1"
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Batch Name <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        type="text"
+                        value={formData.batchName}
+                        onChange={(e) => setFormData({ ...formData, batchName: e.target.value })}
+                        placeholder="Enter batch name"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Start Date <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        type="date"
+                        value={formData.startDate}
+                        onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        End Date <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        type="date"
+                        value={formData.endDate}
+                        onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                        required
+                      />
+                    </div>
                   </div>
 
-                  <div>
-                    <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
-                      Start Date
-                    </label>
-                    <Input
-                      type="date"
-                      id="startDate"
-                      name="startDate"
-                      value={formData.startDate}
-                      onChange={handleChange}
-                      required
-                      className="mt-1"
-                    />
-                  </div>
+                  {/* Courses Section */}
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Courses <span className="text-red-500">*</span>
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <select
+                          onChange={handleCourseSelect}
+                          className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          value=""
+                        >
+                          <option value="">Add a course</option>
+                          {availableCourses.map(course => (
+                            <option key={course._id} value={course._id}>
+                              {course.name} - ₹{course.fees}
+                            </option>
+                          ))}
+                        </select>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          onClick={() => navigate("/courses/add")}
+                          className="flex items-center gap-2"
+                        >
+                          <FaPlus />
+                          New Course
+                        </Button>
+                      </div>
+                    </div>
 
-                  <div>
-                    <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
-                      End Date
-                    </label>
-                    <Input
-                      type="date"
-                      id="endDate"
-                      name="endDate"
-                      value={formData.endDate}
-                      onChange={handleChange}
-                      required
-                      className="mt-1"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Courses
-                    </label>
+                    {/* Selected Courses */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {courses.map((course) => (
-                        <div key={course._id} className="flex items-center">
-                          <input
-                            type="checkbox"
-                            id={`course-${course._id}`}
-                            checked={formData.courses.includes(course._id)}
-                            onChange={() => handleCourseChange(course._id)}
-                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                          />
-                          <label
-                            htmlFor={`course-${course._id}`}
-                            className="ml-2 block text-sm text-gray-900"
+                      {selectedCourses.map(course => (
+                        <div
+                          key={course._id}
+                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
+                        >
+                          <div>
+                            <h4 className="font-medium text-gray-800">{course.name}</h4>
+                            <p className="text-sm text-gray-600">₹{course.fees}</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeCourse(course._id)}
+                            className="text-red-500 hover:text-red-700"
                           >
-                            {course.name}
-                          </label>
+                            <FaTimes />
+                          </button>
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  <div className="flex justify-end space-x-4 pt-4">
+                  <div className="flex justify-end space-x-4">
                     <Button
+                      type="button"
                       variant="secondary"
                       onClick={() => navigate("/batches/all")}
                     >
@@ -193,8 +244,9 @@ const EditBatch = () => {
                     <Button
                       type="submit"
                       variant="primary"
+                      disabled={loading}
                     >
-                      Update Batch
+                      {loading ? "Updating..." : "Update Batch"}
                     </Button>
                   </div>
                 </form>
