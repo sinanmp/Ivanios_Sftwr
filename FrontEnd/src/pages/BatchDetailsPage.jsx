@@ -22,9 +22,7 @@ const BatchDetailsPage = () => {
       try {
         setLoading(true);
         const response = await api.getBatchDetails(id);
-        console.log("Batch details response:", response);
         if (response && !response.error) {
-          console.log("Batch students:", response.batch.students);
           setBatch(response.batch);
         } else {
           throw new Error(response?.message || "Failed to fetch batch details");

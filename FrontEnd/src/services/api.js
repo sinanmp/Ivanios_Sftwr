@@ -94,11 +94,9 @@ async function getStudentDetails(id) {
 async function getBatchDetails(id){
   try{
     const response = await API.get(`/getBatchDetails?id=${id}`);
-    console.log("api js", response)
     return response.data;
   }
   catch(error){
-    console.log(error)
     return error.response ? error.response.data:{error : "Network Error"}
   }
 }
@@ -107,11 +105,9 @@ async function getBatchDetails(id){
 async function fetchCourses(id){
   try{
     const response = await API.get(`/getCourses`);
-    console.log("api js", response)
     return response.data;
   }
   catch(error){
-    console.log(error)
     return error.response ? error.response.data:{error : "Network Error"}
   }
 }
@@ -229,7 +225,6 @@ async function checkExistingStudent(data){
     return response.data;
   }
   catch(error){
-    console.log(error)
     return error.response ? error.response.data:{error : "Network Error"}
   }
 }

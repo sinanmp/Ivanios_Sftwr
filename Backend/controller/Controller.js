@@ -224,7 +224,6 @@ class Controller {
         totalPages: Math.ceil(total / limit),
       });
     } catch (err) {
-      console.log(err)
       res.status(500).json({ error: true, message: "Error fetching students" });
     }
   }
@@ -239,7 +238,6 @@ class Controller {
         student: student
       })
     } catch (error) {
-      console.log(error)
       res.status(500).json({
         error: true,
         message: "internal server error"
@@ -263,7 +261,6 @@ class Controller {
           message: "Batch not found"
         });
       }
-      console.log(batch , "this is batch");
       
       res.status(200).json({
         error: false,
@@ -284,14 +281,12 @@ class Controller {
   static async getCourses(req,res){
     try {
       const result = await Course.find()
-      console.log(result ,"this is result")
       res.status(200).json({
         error:false,
         message:"courses fetched successfully",
         data:result
       })
     } catch (error) {
-      console.log(error)
       res.status(500).json({
         error:true ,
         message:"internel server error"
@@ -489,7 +484,6 @@ class Controller {
     try {
       const { id } = req.query;
       const { name, email, mobile, enrollmentNo, admissionNo, certificates = [] } = req.body;
-      console.log(certificates , "this is certificates")
   
       const student = await Student.findById(id);
   

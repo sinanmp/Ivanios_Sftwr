@@ -30,7 +30,6 @@ const EditBatch = () => {
       try {
         // Fetch batch details
         const batchResponse = await api.getBatchDetails(id);
-        console.log(batchResponse);
         if (batchResponse && !batchResponse.error) {
           setBatch(batchResponse.batch);
           setFormData({

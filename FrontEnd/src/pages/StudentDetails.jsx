@@ -298,7 +298,6 @@ const StudentDetails = () => {
         }
     };
 
-    console.log(student, "student")
     if (loading) return <Spinner />;
     if (error) return <p className="text-red-500">{error}</p>;
     if (!student) return <p>No student found.</p>;

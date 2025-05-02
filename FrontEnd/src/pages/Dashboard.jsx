@@ -28,13 +28,11 @@ const Dashboard = () => {
         
         // Fetch students
         const studentsResponse = await api.fetchStudents(1, '');
-        console.log('Students Response:', studentsResponse);
         const totalStudents = studentsResponse.students?.length || studentsResponse.totalStudents || 0;
         const newStudents = studentsResponse.newStudents || 0;
 
         // Fetch batches
         const batchesResponse = await api.getAllBatches();
-        console.log('Batches Response:', batchesResponse);
         const totalBatches = batchesResponse.batches?.length || 0;
         const activeBatches = batchesResponse.batches?.filter(batch => 
           new Date(batch.endDate) >= new Date()
@@ -43,7 +41,7 @@ const Dashboard = () => {
 
         // Fetch courses
         const coursesResponse = await api.getAllCourses();
-        console.log('Courses Response:', coursesResponse);
+
         const totalCourses = coursesResponse?.length || 0;
 
         setStats({
@@ -56,15 +54,7 @@ const Dashboard = () => {
           newCourses: totalCourses
         });
 
-        console.log('Final Stats:', {
-          totalStudents,
-          totalBatches,
-          totalCourses,
-          activeBatches,
-          newStudents,
-          newBatches: totalBatches - activeBatches,
-          newCourses: totalCourses
-        });
+       
 
       } catch (error) {
         console.error('Error fetching dashboard data:', error);

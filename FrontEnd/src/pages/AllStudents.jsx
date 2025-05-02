@@ -56,7 +56,6 @@ const AllStudents = () => {
       try {
         setLoading(true);
          const res = await api.deleteStudent(id);
-         console.log(res,"this is res");
          if(res && !res.error){
           toast.success("Student deleted successfully");
           fetchStudents();
@@ -64,7 +63,6 @@ const AllStudents = () => {
           toast.error("Failed to delete student");
          }
       } catch (error) {
-        console.log(error,"this is error");
         toast.error("Failed to delete student");
       } finally {
         setLoading(false);
