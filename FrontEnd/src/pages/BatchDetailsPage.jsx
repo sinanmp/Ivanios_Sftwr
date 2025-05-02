@@ -4,7 +4,7 @@ import api from "../services/api";
 import Sidebar from "../components/Sidebar";
 import Spinner from "../components/Spinner";
 import { format } from "date-fns";
-import { FaHome, FaChevronRight, FaEye, FaEdit, FaTrash, FaCalendarAlt, FaUserTie, FaBook } from "react-icons/fa";
+import { FaHome, FaChevronRight, FaEye, FaEdit, FaTrash, FaCalendarAlt, FaUserTie, FaBook, FaArrowLeft } from "react-icons/fa";
 import TopNav from "../components/TopNav";
 import { Card, CardHeader, CardContent } from "../components/ui/Card";
 import Button from "../components/ui/Button";
@@ -24,8 +24,8 @@ const BatchDetailsPage = () => {
         const response = await api.getBatchDetails(id);
         console.log("Batch details response:", response);
         if (response && !response.error) {
-          console.log("Batch students:", response.data.students);
-          setBatch(response.data);
+          console.log("Batch students:", response.batch.students);
+          setBatch(response.batch);
         } else {
           throw new Error(response?.message || "Failed to fetch batch details");
         }
