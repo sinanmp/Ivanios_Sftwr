@@ -128,7 +128,6 @@ const AddCourse = () => {
     if (!formData.name) newErrors.name = "Name is required";
     if (!formData.duration) newErrors.duration = "Duration is required";
     if (!formData.fees) newErrors.fees = "Fees is required";
-    if (!formData.description) newErrors.description = "Description is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -145,7 +144,7 @@ const AddCourse = () => {
         name: formData.name,
         duration: formatDuration(formData.duration, formData.durationUnit),
         fees: parseInt(formData.fees),
-        description: formData.description
+        description: formData.description ?? ''
       });
 
       if (response && !response.error) {

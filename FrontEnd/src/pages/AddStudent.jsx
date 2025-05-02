@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import TopNav from "../components/TopNav";
 import { Card, CardHeader, CardContent } from "../components/ui/Card";
-import { FaUser, FaIdCard, FaEnvelope, FaPhone, FaGraduationCap, FaMoneyBillWave, FaImage, FaFileAlt, FaTimes } from "react-icons/fa";
+import { FaUser, FaIdCard, FaEnvelope, FaPhone, FaGraduationCap, FaMoneyBillWave, FaImage, FaFileAlt, FaTimes, FaPlus } from "react-icons/fa";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import api from "../services/api";
@@ -48,7 +48,11 @@ const AddStudent = () => {
     try {
       const response = await api.getAllBatches();
       if (response && !response.error) {
-        setBatches(response.batches || []);
+        if (response.batches && response.batches.length > 0) {
+          setBatches(response.batches || []);
+        } else {
+          
+        }
       } else {
         throw new Error("Failed to fetch batches");
       }
@@ -349,6 +353,33 @@ const AddStudent = () => {
     }
   };
 
+  if (batches.length === 0) {
+    return (
+      <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <Sidebar />
+        <div className="flex-1 flex flex-col md:ml-64" style={{ marginLeft: 'var(--sidebar-width, 16rem)' }}>
+          <TopNav />
+          <main className="flex-1 overflow-y-auto p-6 pt-24">
+            <div className="flex flex-col items-center justify-center h-64">
+              <div className="bg-white p-8 rounded-lg shadow-md text-center max-w-md">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">No Batches Available</h2>
+                <p className="text-gray-600 mb-6">You need to create a batch before adding students.</p>
+                <Button
+                  variant="primary"
+                  onClick={() => navigate("/batches/add")}
+                  className="flex items-center gap-2"
+                >
+                  <FaPlus />
+                  Create New Batch
+                </Button>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
     {loading && <Spinner />}
@@ -549,10 +580,10 @@ const AddStudent = () => {
                                   required
                                 >
                                   <option value="">Select Type</option>
-                                  <option value="academic">Academic</option>
-                                  <option value="professional">Professional</option>
+                                  <option value="SSLC Certificate">SSLC Certificate</option>
+                                  <option value="PlusTwo Certificate">PlusTwo Certificate</option>
                                   <option value="achievement">Achievement</option>
-                                  <option value="identity">Identity Proof</option>
+                                  <option value="Adhaar">Adhaar</option>
                                   <option value="other">Other</option>
                                 </select>
                                 {cert.type === "other" && (

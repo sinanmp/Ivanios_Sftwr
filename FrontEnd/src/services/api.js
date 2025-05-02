@@ -148,7 +148,7 @@ async function updateStudent(id, data) {
 
 const updateBatch = async (id, data) => {
   try {
-    const response = await API.put(`/batches/${id}`, data);
+    const response = await API.put(`/updateBatches/${id}`, data);
     return response.data;
   } catch (error) {
     throw error.response?.data || { error: true, message: "Failed to update batch" };

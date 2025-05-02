@@ -24,9 +24,9 @@ const CourseDetails = () => {
       setLoading(true);
       const response = await api.getCourseDetails(id);
       if (response && !response.error) {
-        setCourse(response.course);
+        setCourse(response.data);
       } else {
-        throw new Error("Failed to fetch course details");
+        throw new Error(response?.message || "Failed to fetch course details");
       }
     } catch (error) {
       console.error("Error fetching course details:", error);
@@ -46,7 +46,7 @@ const CourseDetails = () => {
           toast.success("Course deleted successfully");
           navigate("/courses");
         } else {
-          throw new Error("Failed to delete course");
+          throw new Error(response?.message || "Failed to delete course");
         }
       } catch (error) {
         console.error("Error deleting course:", error);

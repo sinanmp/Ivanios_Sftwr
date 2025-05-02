@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import api from "../services/api"; // Assuming api.js handles API requests
+import api from "../services/api";
 import Sidebar from "../components/Sidebar";
 import Spinner from "../components/Spinner";
 import { format } from "date-fns";
@@ -8,6 +8,7 @@ import { FaHome, FaChevronRight, FaEye, FaEdit, FaTrash, FaCalendarAlt, FaUserTi
 import TopNav from "../components/TopNav";
 import { Card, CardHeader, CardContent } from "../components/ui/Card";
 import Button from "../components/ui/Button";
+import { toast } from "react-toastify";
 
 const BatchDetailsPage = () => {
   const { id } = useParams();
@@ -19,10 +20,19 @@ const BatchDetailsPage = () => {
   useEffect(() => {
     const fetchBatchDetails = async () => {
       try {
+        setLoading(true);
         const response = await api.getBatchDetails(id);
-        setBatch(response.batch);
+        console.log("Batch details response:", response);
+        if (response && !response.error) {
+          console.log("Batch students:", response.data.students);
+          setBatch(response.data);
+        } else {
+          throw new Error(response?.message || "Failed to fetch batch details");
+        }
       } catch (err) {
-        setError("Failed to fetch batch details");
+        console.error("Error fetching batch details:", err);
+        setError(err.response?.data?.message || "Failed to fetch batch details");
+        toast.error(err.response?.data?.message || "Failed to fetch batch details");
       } finally {
         setLoading(false);
       }
@@ -38,15 +48,77 @@ const BatchDetailsPage = () => {
         ...prev,
         students: prev.students.filter(student => student._id !== studentId)
       }));
+      toast.success("Student deleted successfully");
     } catch (error) {
       console.error("Error deleting student:", error);
+      toast.error(error.response?.data?.message || "Failed to delete student");
     }
   };
 
-  if (loading) return <Spinner />;
-  if (error) return <p className="text-red-500">{error}</p>;
-  if (!batch) return <p>No batch details found.</p>;
-  if(!loading) console.log(batch.students)
+  if (loading) {
+    return (
+      <div className="flex fixed top-0 left-0 w-full h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <Sidebar />
+        <div className="flex-1 flex flex-col md:ml-64" style={{ marginLeft: 'var(--sidebar-width, 16rem)' }}>
+          <TopNav />
+          <main className="flex-1 overflow-y-auto p-6 pt-24">
+            <div className="flex justify-center items-center h-64">
+              <Spinner size="lg" />
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex fixed top-0 left-0 w-full h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <Sidebar />
+        <div className="flex-1 flex flex-col md:ml-64" style={{ marginLeft: 'var(--sidebar-width, 16rem)' }}>
+          <TopNav />
+          <main className="flex-1 overflow-y-auto p-6 pt-24">
+            <div className="flex flex-col items-center justify-center h-64">
+              <p className="text-red-500 text-lg mb-4">{error}</p>
+              <Button
+                variant="outline"
+                onClick={() => navigate("/batches/all")}
+                className="flex items-center gap-2"
+              >
+                <FaArrowLeft />
+                Back to Batches
+              </Button>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  if (!batch) {
+    return (
+      <div className="flex fixed top-0 left-0 w-full h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <Sidebar />
+        <div className="flex-1 flex flex-col md:ml-64" style={{ marginLeft: 'var(--sidebar-width, 16rem)' }}>
+          <TopNav />
+          <main className="flex-1 overflow-y-auto p-6 pt-24">
+            <div className="flex flex-col items-center justify-center h-64">
+              <p className="text-gray-500 text-lg mb-4">No batch details found</p>
+              <Button
+                variant="outline"
+                onClick={() => navigate("/batches/all")}
+                className="flex items-center gap-2"
+              >
+                <FaArrowLeft />
+                Back to Batches
+              </Button>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Sidebar />
@@ -83,7 +155,7 @@ const BatchDetailsPage = () => {
                     <h3 className="text-xl font-semibold text-gray-800">Courses</h3>
                   </div>
                   <ul className="space-y-2">
-                    {batch.courses.length > 0 ? (
+                    {batch.courses && batch.courses.length > 0 ? (
                       batch.courses.map((course, index) => (
                         <li key={index} className="flex items-center text-gray-700">
                           <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
@@ -103,7 +175,7 @@ const BatchDetailsPage = () => {
                       <FaUserTie className="text-blue-500 mr-2" />
                       <div>
                         <p className="text-sm text-gray-500">Instructor</p>
-                        <p className="font-medium text-gray-800">{batch.instructor}</p>
+                        <p className="font-medium text-gray-800">{batch.instructor || "Not assigned"}</p>
                       </div>
                     </div>
                     <div className="flex items-center">
@@ -144,22 +216,13 @@ const BatchDetailsPage = () => {
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Course
                         </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Total Fee
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Fee Paid
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Balance
-                        </th>
                         <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Actions
                         </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {batch.students.length > 0 ? (
+                      {batch.students && batch.students.length > 0 ? (
                         batch.students.map((student) => (
                           <tr key={student._id} className="hover:bg-gray-50 transition-colors duration-150">
                             <td className="px-6 py-4 whitespace-nowrap">
@@ -167,8 +230,12 @@ const BatchDetailsPage = () => {
                                 <div className="flex-shrink-0 h-10 w-10">
                                   <img
                                     className="h-10 w-10 rounded-full object-cover border-2 border-gray-200"
-                                    src={student.profileImage?.url || "/default-profile.png"}
-                                    alt="Profile"
+                                    src={student.profileImage?.url || "https://ui-avatars.com/api/?name=" + encodeURIComponent(student.name) + "&background=random"}
+                                    alt={student.name}
+                                    onError={(e) => {
+                                      e.target.onerror = null;
+                                      e.target.src = "https://ui-avatars.com/api/?name=" + encodeURIComponent(student.name) + "&background=random";
+                                    }}
                                   />
                                 </div>
                                 <div className="ml-4">
@@ -186,15 +253,6 @@ const BatchDetailsPage = () => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="text-sm text-gray-500">{batch.courses?.map(course => course.name).join(", ") || "N/A"}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">₹{student.totalFees?.toLocaleString() || "0"}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">₹{student.feesPaid?.toLocaleString() || "0"}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">₹{(student.totalFees - student.feesPaid)?.toLocaleString() || "0"}</div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                               <div className="flex justify-center space-x-3">
@@ -225,7 +283,7 @@ const BatchDetailsPage = () => {
                         ))
                       ) : (
                         <tr>
-                          <td colSpan="7" className="px-6 py-12">
+                          <td colSpan="4" className="px-6 py-12">
                             <div className="flex flex-col items-center justify-center space-y-4">
                               <div className="bg-gray-100 p-4 rounded-full">
                                 <svg className="h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
